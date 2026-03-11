@@ -1,146 +1,145 @@
-# Plano da Ferramenta (Uso Diário) - AI Solution Architect
+# Daily-Use Tool Plan - AI Solution Architect
 
-## 1) Objetivo da ferramenta
-Criar um "Decision OS" interno para você decidir com consistência:
-- o que priorizar;
-- qual arquitetura escolher;
-- qual risco aceitar;
-- e como justificar a decisão para negócio, segurança e compliance.
+## 1) Tool objective
+Create an internal "Decision OS" so architecture choices are consistent, explainable, and fast:
+- what to prioritize;
+- which architecture pattern to choose;
+- which risks are acceptable;
+- and how to justify decisions to business, security, and compliance.
 
-Saída principal: decisão recomendada + evidências + plano de execução.
+Primary output: recommended decision + evidence + execution plan.
 
-## 2) Como você usaria no dia a dia
-### Ritual diário (30-45 min)
-1. Abrir Inbox de decisões pendentes.
-2. Fazer triagem por impacto, urgência e risco.
-3. Rodar score automático de cada caso.
-4. Validar guardrails (compliance/segurança).
-5. Publicar decisão (ADR) e próximos passos.
+## 2) Daily operating model
+### Daily ritual (30-45 min)
+1. Open the decision inbox.
+2. Triage by impact, urgency, and risk.
+3. Run automated scoring.
+4. Validate compliance/security gates.
+5. Publish the decision (ADR) and next steps.
 
-### Ritual semanal (60 min)
-1. Revisar decisões tomadas vs resultado real.
-2. Ajustar pesos de scoring.
-3. Identificar padrões de gargalo (dados, integração, aprovações).
-4. Atualizar padrões arquiteturais recomendados.
+### Weekly ritual (60 min)
+1. Review decision outcomes vs expected outcomes.
+2. Recalibrate score weights.
+3. Identify bottlenecks (data, integration, approvals).
+4. Update recommended architecture standards.
 
-## 3) Módulos do produto (MVP)
-1. Inbox de Decisões
-- Lista de demandas (Jira/ServiceNow/manual), status e SLA de decisão.
+## 3) MVP product modules
+1. Decision Inbox
+- Intake from Jira/ServiceNow/manual with status and SLA.
 
 2. Decision Canvas
-- Formulário curto por caso: objetivo, KPI, restrições, risco, deadline.
+- Compact input form: objective, KPI, constraints, risk, timeline.
 
-3. Engine de Guardrails
-- Regras pass/fail: LGPD, EU AI Act, dados sensíveis, residência, segurança mínima.
+3. Gate Engine
+- Pass/fail rules for regulation, security, data governance, economics.
 
-4. Engine de Scoring
-- Modelo ponderado para comparar opções arquiteturais.
-- Exemplo de opções: Classic RAG, Agentic RAG, Fine-tuning, Hybrid.
+4. Scoring Engine
+- Weighted model to compare architecture options.
+- Examples: Classic RAG, Agentic RAG, Fine-tuning, Hybrid.
 
-5. Recomendação e Trade-off
-- Top 3 opções + por que ganhou/perdeu.
-- Simulação "what-if": custo, latência, qualidade, prazo.
+5. Recommendation & Trade-off View
+- Top 3 options with rationale and rejection reasons.
+- What-if simulation for cost, latency, quality, timeline.
 
-6. Governança Automática
-- Geração de ADR, checklist de compliance e registro de riscos.
+6. Governance Automation
+- Auto-generated ADR, compliance checklist, and risk register.
 
-7. Painel de Resultados
-- Tempo médio de decisão, retrabalho, acurácia da previsão, risco por portfólio.
+7. Outcome Dashboard
+- Decision cycle time, rework, forecast accuracy, risk exposure.
 
-## 4) Modelo de decisão sugerido
-### Etapa 1: filtros obrigatórios (hard gates)
-- Compliance/regulação.
-- Segurança mínima.
-- Limites de custo.
-- Requisitos mínimos de SLO.
+## 4) Decision model
+### Step 1: mandatory gates
+- Compliance and regulatory fit.
+- Minimum security controls.
+- Budget boundaries.
+- Minimum SLO requirements.
 
-Se falhar em qualquer gate, a opção é descartada.
+If any gate fails, the option is excluded.
 
-### Etapa 2: pontuação ponderada
-- Impacto de negócio: 25%
+### Step 2: weighted scoring
+- Business impact: 25%
 - Time-to-value: 15%
-- Viabilidade técnica: 15%
+- Technical feasibility: 15%
 - TCO: 15%
-- Risco/compliance residual: 15%
-- Operabilidade/observabilidade: 10%
-- Fricção de adoção: 5%
+- Residual risk/compliance: 15%
+- Operability/observability: 10%
+- Adoption friction: 5%
 
-Resultado final:
-`score_final = soma(peso * nota) - penalidades`
+Formula:
+`final_score = sum(weight * score) - penalties`
 
-## 5) Telas que realmente importam
-1. `Home / Inbox`
-- Cards de decisão com SLA, risco e "próxima ação".
+## 5) Key screens
+1. Home / Inbox
+- Decision cards with SLA, risk, and next action.
 
-2. `Decision Workspace`
-- Formulário + scoring em tempo real + comparativo de opções.
+2. Decision Workspace
+- Form + real-time scoring + option comparison.
 
-3. `Governance Pack`
-- ADR pronto + checklist + evidências anexas.
+3. Governance Pack
+- ADR + checklist + evidence bundle.
 
-4. `Portfolio Dashboard`
-- Métricas por área, por tipo de decisão e por unidade de negócio.
+4. Portfolio Dashboard
+- Metrics by area, decision type, and business unit.
 
-## 6) Stack recomendada (pragmática)
-1. Frontend: React + Next.js (rápido para UI interna).
-2. Backend: Python FastAPI (bom para regras e simulação).
-3. Banco: Postgres.
-4. Regras: YAML versionado em Git.
-5. Integração: Jira/ServiceNow/Confluence (fase 2).
-6. Auth: SSO corporativo.
+## 6) Recommended stack
+1. Frontend: React + Next.js.
+2. Backend: Python FastAPI.
+3. Database: Postgres.
+4. Rules: versioned YAML in Git.
+5. Integrations: Jira/ServiceNow/Confluence.
+6. Access: enterprise SSO.
 
-## 7) Roadmap de 90 dias
-### Fase 0 (Semana 1)
-- Definir 10 decisões mais frequentes.
-- Definir matriz de scoring e gates.
+## 7) 90-day roadmap
+### Phase 0 (Week 1)
+- Define top 10 recurring decision types.
+- Define scoring matrix and mandatory gates.
 
-### Fase 1 (Semanas 2-4)
-- Construir Inbox + Decision Canvas + scoring básico.
-- Exportar ADR em Markdown/PDF.
+### Phase 1 (Weeks 2-4)
+- Build inbox + canvas + baseline scoring.
+- Export ADR in Markdown/PDF.
 
-### Fase 2 (Semanas 5-8)
-- Incluir guardrails de compliance e segurança.
-- Conectar 1 fonte externa (Jira ou ServiceNow).
+### Phase 2 (Weeks 5-8)
+- Add compliance/security gate checks.
+- Integrate one source system (Jira or ServiceNow).
 
-### Fase 3 (Semanas 9-12)
-- Dashboard com métricas.
-- Piloto com 2-3 squads.
-- Ajuste de pesos com dados reais.
+### Phase 3 (Weeks 9-12)
+- Add portfolio dashboard.
+- Pilot with 2-3 squads.
+- Tune scoring using actual outcomes.
 
-## 8) Backlog priorizado
-### Agora
-1. Canvas + scoring + ADR.
-2. Regras de gate para dados sensíveis.
-3. Dashboard mínimo de ciclo de decisão.
+## 8) Prioritized backlog
+### Now
+1. Decision canvas + scoring + ADR output.
+2. Data-sensitive gate rules.
+3. Minimal dashboard for decision cycle metrics.
 
-### Próximo
-1. Simulação de cenário (what-if).
-2. Integração com tickets.
-3. Biblioteca de arquiteturas padrão.
+### Next
+1. What-if simulator.
+2. Ticketing integration.
+3. Standard architecture library.
 
-### Depois
-1. Copiloto conversacional para preencher canvas.
-2. Benchmark automático de custo/modelo.
-3. Recomendações por similaridade com decisões passadas.
+### Later
+1. Conversational copilot for intake.
+2. Automated model/cost benchmark.
+3. Similarity-based recommendation from past decisions.
 
-## 9) KPIs para provar valor
-1. Redução de tempo de decisão.
-2. Redução de retrabalho arquitetural.
-3. Aumento de aderência a padrões.
-4. Queda de achados de compliance pós-release.
-5. Acurácia previsão vs resultado (custo, prazo, qualidade).
+## 9) Success KPIs
+1. Decision cycle-time reduction.
+2. Architecture rework reduction.
+3. Standards adoption increase.
+4. Compliance findings reduction.
+5. Forecast-vs-actual accuracy (cost/time/quality).
 
-## 10) Definição de pronto da ferramenta (MVP)
-1. Você decide um caso em menos de 20 minutos.
-2. A ferramenta entrega recomendação justificável e auditável.
-3. ADR sai automático sem edição pesada.
-4. Segurança/compliance aprovam sem "volta para refazer" na maioria dos casos.
+## 10) MVP definition of done
+1. One decision can be completed in under 20 minutes.
+2. Recommendation is explainable and auditable.
+3. ADR is generated automatically with low manual effort.
+4. Governance approval passes without major rework in most cases.
 
-## 11) Exemplo real de uso
-Caso: "Assistente interno para suporte TI em 60 dias."
-1. Preenche objetivo, KPI, dados envolvidos e integrações.
-2. Ferramenta elimina opções fora de compliance.
-3. Compara RAG clássico vs Agentic RAG vs fine-tuning.
-4. Recomenda arquitetura com score, custo estimado e riscos.
-5. Gera ADR + plano 30/60/90 dias para execução.
-
+## 11) Example usage
+Case: "Internal IT assistant in 60 days."
+1. Fill objective, KPI, data scope, and integrations.
+2. Tool removes non-compliant options.
+3. Compare Classic RAG vs Agentic RAG vs fine-tuning.
+4. Recommend architecture with score, estimated cost, and risks.
+5. Generate ADR + 30/60/90 execution plan.

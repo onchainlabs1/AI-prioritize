@@ -11,19 +11,19 @@ MAX_LIST=200
 
 usage() {
   cat <<'EOF'
-Uso:
+Usage:
   ./visualizar_arquivos.sh
-  ./visualizar_arquivos.sh --dir "/caminho"
-  ./visualizar_arquivos.sh --preview "/caminho/arquivo.ext"
-  ./visualizar_arquivos.sh --open "/caminho/arquivo.ext"
+  ./visualizar_arquivos.sh --dir "/path"
+  ./visualizar_arquivos.sh --preview "/path/file.ext"
+  ./visualizar_arquivos.sh --open "/path/file.ext"
 
-Opcoes:
-  --dir       Lista arquivos do diretorio (max depth 3).
-  --preview   Mostra preview rapido (texto) ou metadados (pdf/imagem/binario).
-  --open      Abre o arquivo no app padrao do macOS.
-  -h, --help  Mostra esta ajuda.
+Options:
+  --dir       List files in a directory (max depth 3).
+  --preview   Show quick preview (text) or metadata (pdf/image/binary).
+  --open      Open file in the default macOS app.
+  -h, --help  Show help.
 
-Exemplos:
+Examples:
   ./visualizar_arquivos.sh --dir "/Users/fabio/Desktop"
   ./visualizar_arquivos.sh --preview "/Users/fabio/Desktop/Enterprise_AI_Blueprint.pdf"
   ./visualizar_arquivos.sh --open "/Users/fabio/Desktop/KOSTAL_Enterprise_AI_Playbook_(2).pdf"
@@ -33,11 +33,11 @@ EOF
 list_files() {
   local dir="$1"
   if [[ ! -d "$dir" ]]; then
-    echo "Diretorio nao encontrado: $dir" >&2
+    echo "Directory not found: $dir" >&2
     exit 1
   fi
 
-  echo "Listando arquivos em: $dir"
+  echo "Listing files in: $dir"
   find "$dir" -maxdepth 3 \( -type d -name "*.app" -prune \) -o -type f -print \
     | head -n "$MAX_LIST" \
     | awk '{
@@ -51,7 +51,7 @@ list_files() {
 preview_file() {
   local file="$1"
   if [[ ! -f "$file" ]]; then
-    echo "Arquivo nao encontrado: $file" >&2
+    echo "File not found: $file" >&2
     exit 1
   fi
 
@@ -60,35 +60,35 @@ preview_file() {
 
   case "$ext" in
     txt|md|json|yaml|yml|py|js|ts|tsx|jsx|sh|toml|ini|csv|sql|html|css)
-      echo "Preview textual (primeiras 120 linhas): $file"
+      echo "Text preview (first 120 lines): $file"
       sed -n '1,120p' "$file"
       ;;
     pdf)
-      echo "Metadados PDF: $file"
+      echo "PDF metadata: $file"
       if mdls -name kMDItemTitle -name kMDItemNumberOfPages -name kMDItemFSSize "$file" 2>/dev/null; then
         :
       else
         # Fallback for environments where Spotlight metadata is unavailable.
-        stat -f "Tamanho: %z bytes | Modificado: %Sm" -t "%Y-%m-%d %H:%M:%S" "$file"
+        stat -f "Size: %z bytes | Modified: %Sm" -t "%Y-%m-%d %H:%M:%S" "$file"
         local pages
         pages="$(strings "$file" | rg -o '/Count [0-9]+' | head -n 1 | awk '{print $2}' || true)"
         if [[ -n "${pages:-}" ]]; then
-          echo "Paginas (estimado): $pages"
+          echo "Estimated pages: $pages"
         fi
       fi
       echo
-      echo "Dica: para abrir visualmente, use:"
+      echo "Tip: to open visually, use:"
       echo "  ./visualizar_arquivos.sh --open \"$file\""
       ;;
     png|jpg|jpeg|gif|webp|heic|svg)
-      echo "Metadados de imagem: $file"
+      echo "Image metadata: $file"
       mdls -name kMDItemPixelWidth -name kMDItemPixelHeight -name kMDItemFSSize "$file" 2>/dev/null || true
       echo
-      echo "Dica: para abrir visualmente, use:"
+      echo "Tip: to open visually, use:"
       echo "  ./visualizar_arquivos.sh --open \"$file\""
       ;;
     *)
-      echo "Tipo nao textual. Mostrando metadados basicos: $file"
+      echo "Non-text type. Showing basic metadata: $file"
       mdls -name kMDItemFSSize "$file" 2>/dev/null || true
       file "$file" || true
       ;;
@@ -98,10 +98,10 @@ preview_file() {
 open_file() {
   local file="$1"
   if [[ ! -f "$file" ]]; then
-    echo "Arquivo nao encontrado: $file" >&2
+    echo "File not found: $file" >&2
     exit 1
   fi
-  echo "Abrindo arquivo: $file"
+  echo "Opening file: $file"
   open "$file"
 }
 
@@ -130,7 +130,7 @@ while [[ $# -gt 0 ]]; do
       exit 0
       ;;
     *)
-      echo "Opcao invalida: $1" >&2
+      echo "Invalid option: $1" >&2
       usage
       exit 1
       ;;
@@ -143,14 +143,14 @@ case "$MODE" in
     ;;
   preview)
     if [[ -z "$TARGET" ]]; then
-      echo "Informe um arquivo para --preview" >&2
+      echo "Please provide a file for --preview" >&2
       exit 1
     fi
     preview_file "$TARGET"
     ;;
   open)
     if [[ -z "$TARGET" ]]; then
-      echo "Informe um arquivo para --open" >&2
+      echo "Please provide a file for --open" >&2
       exit 1
     fi
     open_file "$TARGET"
