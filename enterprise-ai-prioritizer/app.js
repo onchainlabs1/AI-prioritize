@@ -1,47 +1,10 @@
-const CRITERIA = [
-  {
-    key: "businessImpact",
-    label: "Business impact",
-    weight: 25,
-    help: "Revenue uplift, cost reduction, risk avoided",
-  },
-  {
-    key: "timeToValue",
-    label: "Time-to-value",
-    weight: 15,
-    help: "Speed to deliver value in production",
-  },
-  {
-    key: "platformLeverage",
-    label: "Platform leverage and reuse",
-    weight: 15,
-    help: "Cross-business-unit reuse",
-  },
-  {
-    key: "readiness",
-    label: "Technical and data readiness",
-    weight: 15,
-    help: "Integrations, data quality, ownership",
-  },
-  {
-    key: "unitEconomics",
-    label: "Unit economics",
-    weight: 15,
-    help: "Cost per transaction/token and payback",
-  },
-  {
-    key: "adoption",
-    label: "Adoption and change readiness",
-    weight: 10,
-    help: "Workflow adoption and sponsorship",
-  },
-  {
-    key: "residualRisk",
-    label: "Residual risk (after controls)",
-    weight: 5,
-    help: "5 = low residual risk",
-  },
-];
+import {
+  CRITERIA,
+  classify,
+  getGateStatus as evaluateGates,
+  getScores as evaluateScores,
+  useCaseHint,
+} from "./decision-engine.js";
 
 const el = {
   criteriaContainer: document.getElementById("criteriaContainer"),
@@ -87,71 +50,20 @@ function renderCriteria() {
 }
 
 function getGateStatus() {
-  const gates = [
-    { label: "Regulatory risk classification", ok: el.gateRegulatory.checked },
-    { label: "Security threat model", ok: el.gateSecurity.checked },
-    { label: "Data governance", ok: el.gateData.checked },
-    { label: "KPI + baseline + economics", ok: el.gateEconomics.checked },
-  ];
-  const failed = gates.filter((g) => !g.ok).map((g) => g.label);
-  return { ok: failed.length === 0, failed };
+  return evaluateGates({
+    regulatory: el.gateRegulatory.checked,
+    security: el.gateSecurity.checked,
+    data: el.gateData.checked,
+    economics: el.gateEconomics.checked,
+  });
 }
 
 function getScores() {
-  let weighted = 0;
-  const details = [];
-  CRITERIA.forEach((c) => {
-    const raw = Number(document.getElementById(c.key).value);
-    const score = Number.isFinite(raw) ? Math.min(5, Math.max(1, raw)) : 1;
-    weighted += (score / 5) * c.weight;
-    details.push({ label: c.label, score, weight: c.weight });
+  const scoreInput = {};
+  CRITERIA.forEach((criterion) => {
+    scoreInput[criterion.key] = Number(document.getElementById(criterion.key).value);
   });
-  return { total: Math.round(weighted * 10) / 10, details };
-}
-
-function classify(score, gateOk) {
-  if (!gateOk) {
-    return {
-      tier: "NO-GO",
-      lane: "Do not prioritize now",
-      css: "bad",
-      rationale: "One or more mandatory gates failed.",
-    };
-  }
-
-  if (score >= 75) {
-    return {
-      tier: "A",
-      lane: "Prioritize now",
-      css: "good",
-      rationale: "Strong likelihood of value and execution in the current cycle.",
-    };
-  }
-  if (score >= 60) {
-    return {
-      tier: "B",
-      lane: "Guided discovery",
-      css: "warn",
-      rationale: "Needs uncertainty reduction before scaling.",
-    };
-  }
-  return {
-    tier: "C",
-    lane: "Backlog / reassess",
-    css: "bad",
-    rationale: "Low value-risk-readiness ratio at this time.",
-  };
-}
-
-function useCaseHint(useCaseType) {
-  const hints = {
-    assistant: "Start with classic RAG plus prompt and data guardrails.",
-    customer_support: "Require human fallback and first-contact resolution tracking.",
-    automation: "Prioritize high-volume, low-variability processes.",
-    analytics: "Require a statistical baseline and out-of-sample validation.",
-    risk: "Include early compliance approval and traceable audit evidence.",
-  };
-  return hints[useCaseType] || "Define a reference architecture with minimum controls.";
+  return evaluateScores(scoreInput);
 }
 
 function buildReport() {

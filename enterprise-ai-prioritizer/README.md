@@ -19,6 +19,14 @@ python3 -m http.server 8787
 Open in the browser:
 - `http://localhost:8787`
 
+## Run unit tests
+From project root:
+
+```bash
+cd "/Users/fabio/Documents/ai-architect-decision-workbench"
+npm test
+```
+
 ## Best-practice baseline (Mar/2026)
 - EU AI Act timeline (European Commission)
 - NIST AI RMF + Generative AI Profile
