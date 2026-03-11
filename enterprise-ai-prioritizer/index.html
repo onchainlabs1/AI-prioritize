@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Enterprise AI Prioritizer</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <h1>Enterprise AI Prioritizer</h1>
+      <p>
+        Ferramenta para priorizar projetos de IA com gates obrigatorios,
+        scoring ponderado e recomendacao de sequenciamento.
+      </p>
+      <p class="meta">Baseline de praticas: marco/2026</p>
+    </header>
+
+    <main class="layout">
+      <section class="card">
+        <h2>1) Contexto do Projeto</h2>
+        <div class="grid two">
+          <label>
+            Nome do projeto
+            <input id="projectName" type="text" placeholder="Ex: Assistente TI Interno" />
+          </label>
+          <label>
+            Unidade de negocio
+            <input id="businessUnit" type="text" placeholder="Ex: Operacoes" />
+          </label>
+          <label>
+            Tipo de caso
+            <select id="useCaseType">
+              <option value="assistente">Assistente interno</option>
+              <option value="atendimento">Atendimento ao cliente</option>
+              <option value="automacao">Automacao de processo</option>
+              <option value="analitica">Analitica e previsao</option>
+              <option value="risco">Risco/compliance</option>
+            </select>
+          </label>
+          <label>
+            Regiao regulatoria
+            <select id="region">
+              <option value="eu-us">EU + US</option>
+              <option value="eu">EU</option>
+              <option value="us">US</option>
+              <option value="global">Global</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>2) Gates Obrigatorios (pass/fail)</h2>
+        <p class="hint">
+          Se um gate falhar, a recomendacao e "Nao priorizar agora".
+        </p>
+        <div class="grid one checklist">
+          <label><input id="gateRegulatory" type="checkbox" /> Classificacao de risco regulatorio definida (ex: AI Act).</label>
+          <label><input id="gateSecurity" type="checkbox" /> Threat model de IA concluido (LLM/app/API/data chain).</label>
+          <label><input id="gateData" type="checkbox" /> Dono do dado, base legal e trilha de auditoria definidos.</label>
+          <label><input id="gateEconomics" type="checkbox" /> KPI de negocio + baseline + unit economics definidos.</label>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>3) Scoring Ponderado (1 a 5)</h2>
+        <p class="hint">
+          Escala sugerida: 1 = fraco, 3 = medio, 5 = forte.
+        </p>
+        <div id="criteriaContainer" class="criteria"></div>
+      </section>
+
+      <section class="card">
+        <h2>4) Resultado</h2>
+        <div class="actions">
+          <button id="runButton">Calcular Prioridade</button>
+          <button id="copyButton" class="secondary">Copiar Relatorio</button>
+          <button id="resetButton" class="secondary">Limpar</button>
+        </div>
+        <div id="result" class="result empty">Preencha e clique em "Calcular Prioridade".</div>
+      </section>
+
+      <section class="card">
+        <h2>5) Referencias de boas praticas (mar/2026)</h2>
+        <ul>
+          <li><a href="https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai" target="_blank" rel="noreferrer">EU AI Act - timeline oficial (Comissao Europeia)</a></li>
+          <li><a href="https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-generative-artificial-intelligence" target="_blank" rel="noreferrer">NIST AI RMF - Generative AI Profile (NIST AI 600-1)</a></li>
+          <li><a href="https://www.nist.gov/itl/ai-risk-management-framework/nist-ai-rmf-playbook" target="_blank" rel="noreferrer">NIST AI RMF Playbook</a></li>
+          <li><a href="https://owasp.org/www-project-top-10-for-large-language-model-applications/" target="_blank" rel="noreferrer">OWASP Top 10 for LLM Applications v1.1</a></li>
+          <li><a href="https://www.iso.org/standard/42001" target="_blank" rel="noreferrer">ISO/IEC 42001:2023 (AI management system)</a></li>
+          <li><a href="https://www.finops.org/framework/scope/finops-for-ai/" target="_blank" rel="noreferrer">FinOps for AI (FinOps Foundation)</a></li>
+        </ul>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
