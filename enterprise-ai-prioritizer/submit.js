@@ -7,12 +7,12 @@ function readValue(id) {
   return document.getElementById(id)?.value?.trim() || "";
 }
 
-form.addEventListener("submit", (event) => {
+form.addEventListener("submit", async (event) => {
   event.preventDefault();
   statusEl.classList.remove("status-ok", "status-warn");
 
   try {
-    const initiative = createInitiative(
+    const initiative = await createInitiative(
       {
         title: readValue("title"),
         businessUnit: readValue("businessUnit"),

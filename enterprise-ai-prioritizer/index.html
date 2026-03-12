@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Enterprise AI Prioritizer</title>
+    <title>AI Prioritization Workbench</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -17,240 +17,80 @@
       <div class="hero-glow one"></div>
       <div class="hero-glow two"></div>
       <div class="hero">
-        <p class="eyebrow">Enterprise AI Portfolio Intelligence</p>
-        <h1>Prioritize AI initiatives with transparent, defensible logic</h1>
+        <p class="eyebrow">AI Initiative Prioritization Workbench</p>
+        <h1>Portfolio Command Center</h1>
         <p>
-          Decision-support system for AI portfolio governance with Stage 0 fit
-          check, tri-state gates, weighted scoring, and confidence-aware output.
+          Decide what to prioritize now, what to incubate, and what to stop with a transparent
+          enterprise workflow.
         </p>
         <nav class="top-nav">
+          <a href="./index.html" class="active">Home</a>
           <a href="./submit.html">Submit</a>
           <a href="./triage.html">Triage Queue</a>
+          <a href="./assessment.html">Assessment</a>
           <a href="./board.html">Board View</a>
-          <a href="./index.html" class="active">Initiative Assessment</a>
-          <a href="./config.html">Admin Config</a>
+          <a href="./config.html">Admin</a>
+          <a href="./how-it-works.html">Method</a>
         </nav>
-        <div class="hero-stats">
-          <article>
-            <strong>Stage 0</strong>
-            <span>Does this need AI?</span>
-          </article>
-          <article>
-            <strong>3-state gates</strong>
-            <span>Pass / Conditional / Fail</span>
-          </article>
-          <article>
-            <strong>Configurable</strong>
-            <span>Weights, thresholds, penalties</span>
-          </article>
-        </div>
-        <div class="hero-actions">
-          <a class="hero-link" href="./submit.html">Submit New Idea</a>
-          <a class="hero-link" href="./triage.html">Open Triage Queue</a>
-          <a class="hero-link" href="./config.html">Open Configuration</a>
-        </div>
       </div>
     </header>
 
-    <main class="workspace">
+    <main class="workspace compact-workspace">
       <section class="main-column">
         <article class="panel" style="--delay: 0ms">
           <div class="panel-head">
-            <h2>Initiative Context</h2>
-            <span class="tag">Record</span>
+            <h2>Portfolio Snapshot</h2>
+            <span class="tag">Live</span>
           </div>
-          <p id="initiativeContext" class="hint">
-            Open this page with `?id=<initiative-id>` from Triage Queue to save an auditable assessment.
-          </p>
-        </article>
-
-        <article class="panel" style="--delay: 0ms">
-          <div class="panel-head">
-            <h2>01. Project Context</h2>
-            <span class="tag">Input</span>
-          </div>
-          <div class="grid two">
-            <label>
-              Project name
-              <input id="projectName" type="text" placeholder="e.g. Internal IT Assistant" />
-            </label>
-            <label>
-              Business unit
-              <input id="businessUnit" type="text" placeholder="e.g. Operations" />
-            </label>
-            <label>
-              Use-case type
-              <select id="useCaseType">
-                <option value="assistant">Internal assistant</option>
-                <option value="customer_support">Customer support</option>
-                <option value="automation">Process automation</option>
-                <option value="analytics">Analytics and forecasting</option>
-                <option value="risk">Risk/compliance</option>
-              </select>
-            </label>
-            <label>
-              Regulatory region
-              <select id="region">
-                <option value="eu-us">EU + US</option>
-                <option value="eu">EU</option>
-                <option value="us">US</option>
-                <option value="global">Global</option>
-              </select>
-            </label>
+          <div class="dashboard-kpis">
+            <div class="kpi-card">
+              <span>Submitted</span>
+              <strong id="kpiSubmitted">0</strong>
+            </div>
+            <div class="kpi-card">
+              <span>In Assessment</span>
+              <strong id="kpiAssessment">0</strong>
+            </div>
+            <div class="kpi-card">
+              <span>Board Review</span>
+              <strong id="kpiBoard">0</strong>
+            </div>
+            <div class="kpi-card">
+              <span>Approved</span>
+              <strong id="kpiApproved">0</strong>
+            </div>
           </div>
         </article>
 
         <article class="panel" style="--delay: 60ms">
           <div class="panel-head">
-            <h2>02. Stage 0 - Is AI the right approach?</h2>
-            <span class="tag">Fit Filter</span>
+            <h2>Top Priority Queue</h2>
+            <span id="priorityCount" class="tag">0</span>
           </div>
-          <p class="hint">
-            This step prevents forcing GenAI where workflow automation, BI, or classical ML may be better.
-          </p>
-          <label>
-            Candidate route
-            <select id="stage0Fit">
-              <option value="genai_rag">GenAI / RAG candidate</option>
-              <option value="agentic">Agentic candidate</option>
-              <option value="classical_ml">Classical ML candidate</option>
-              <option value="deterministic">Deterministic automation candidate</option>
-              <option value="not_suitable">Not suitable yet (requires process redesign)</option>
-            </select>
-          </label>
-        </article>
-
-        <article class="panel" style="--delay: 120ms">
-          <div class="panel-head">
-            <h2>03. Mandatory Gates</h2>
-            <span class="tag critical">Pass / Conditional / Fail</span>
-          </div>
-          <p class="hint">
-            `Fail` blocks the initiative. `Conditional` keeps it alive with penalty and constraints.
-          </p>
-          <div class="gates-grid">
-            <label class="gate-row">
-              <span>Regulatory risk classification</span>
-              <select id="gateRegulatory">
-                <option value="pass">Pass</option>
-                <option value="conditional">Conditional</option>
-                <option value="fail">Fail</option>
-              </select>
-            </label>
-            <label class="gate-row">
-              <span>Security threat model</span>
-              <select id="gateSecurity">
-                <option value="pass">Pass</option>
-                <option value="conditional">Conditional</option>
-                <option value="fail">Fail</option>
-              </select>
-            </label>
-            <label class="gate-row">
-              <span>Data governance readiness</span>
-              <select id="gateData">
-                <option value="pass">Pass</option>
-                <option value="conditional">Conditional</option>
-                <option value="fail">Fail</option>
-              </select>
-            </label>
-            <label class="gate-row">
-              <span>KPI baseline + unit economics</span>
-              <select id="gateEconomics">
-                <option value="pass">Pass</option>
-                <option value="conditional">Conditional</option>
-                <option value="fail">Fail</option>
-              </select>
-            </label>
-          </div>
-        </article>
-
-        <article class="panel" style="--delay: 180ms">
-          <div class="panel-head">
-            <h2>04. Weighted Scoring</h2>
-            <span class="tag">Score + Evidence</span>
-          </div>
-          <p class="hint">
-            Score from 1-5. Evidence quality influences confidence and score contribution.
-          </p>
-          <div class="weight-toolbar">
-            <div id="weightsTotal" class="weight-total">Weight total entered: 100%</div>
-            <button id="normalizeWeightsButton" class="tertiary" type="button">
-              Normalize Weights to 100%
-            </button>
-          </div>
-          <div id="criteriaContainer" class="criteria"></div>
-        </article>
-
-        <article class="panel" style="--delay: 240ms">
-          <div class="panel-head">
-            <h2>05. Executive Decision</h2>
-            <span class="tag">Output</span>
-          </div>
-          <p id="modelSummary" class="hint"></p>
-          <div class="actions">
-            <button id="runButton">Calculate Priority</button>
-            <button id="saveAssessmentButton" class="secondary">Save Assessment</button>
-            <button id="copyButton" class="secondary">Copy Report</button>
-            <button id="resetButton" class="secondary">Reset</button>
-          </div>
-          <p id="assessmentStatus" class="hint"></p>
-
-          <div class="decision-strip">
-            <div class="metric">
-              <span>Score</span>
-              <strong id="scoreValue">--</strong>
-            </div>
-            <div class="metric">
-              <span>Lane</span>
-              <strong id="laneValue">--</strong>
-            </div>
-            <div class="metric">
-              <span>Gates</span>
-              <strong id="gateValue">--</strong>
-            </div>
-            <div class="metric">
-              <span>Confidence</span>
-              <strong id="confidenceValue">--</strong>
-            </div>
-          </div>
-          <div class="progress-track" aria-hidden="true">
-            <div id="scoreBar" class="progress-bar"></div>
-          </div>
-
-          <div id="result" class="result empty">Fill the fields and click "Calculate Priority".</div>
+          <p class="hint">Top initiatives by priority lane and score ready for action.</p>
+          <div id="priorityList" class="queue-list"></div>
         </article>
       </section>
 
       <aside class="side-column">
-        <article class="panel side" style="--delay: 280ms">
+        <article class="panel side" style="--delay: 120ms">
           <div class="panel-head">
-            <h2>Selection Logic Used</h2>
-            <span class="tag">Method</span>
+            <h2>Attention Alerts</h2>
+            <span class="tag critical">Focus</span>
           </div>
-          <ul class="clean-list">
-            <li><strong>Stage 0:</strong> verify whether AI is the right approach.</li>
-            <li><strong>Stage 1:</strong> evaluate mandatory gates using Pass / Conditional / Fail.</li>
-            <li><strong>Stage 2:</strong> rank with weighted scoring and evidence multipliers.</li>
-            <li><strong>Transparency:</strong> output includes gates, penalties, and full breakdown.</li>
-          </ul>
+          <ul id="alertList" class="clean-list"></ul>
         </article>
 
-        <article class="panel side" style="--delay: 320ms">
+        <article class="panel side" style="--delay: 160ms">
           <div class="panel-head">
-            <h2>Best-Practice References (Mar 2026)</h2>
+            <h2>Recent Decisions</h2>
+            <span class="tag">Board</span>
           </div>
-          <ul class="clean-list links">
-            <li><a href="https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai" target="_blank" rel="noreferrer">EU AI Act - official timeline (European Commission)</a></li>
-            <li><a href="https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-generative-artificial-intelligence" target="_blank" rel="noreferrer">NIST AI RMF - Generative AI Profile (NIST AI 600-1)</a></li>
-            <li><a href="https://www.nist.gov/itl/ai-risk-management-framework/nist-ai-rmf-playbook" target="_blank" rel="noreferrer">NIST AI RMF Playbook</a></li>
-            <li><a href="https://owasp.org/www-project-top-10-for-large-language-model-applications/" target="_blank" rel="noreferrer">OWASP Top 10 for LLM Applications v1.1</a></li>
-            <li><a href="https://www.iso.org/standard/42001" target="_blank" rel="noreferrer">ISO/IEC 42001:2023</a></li>
-            <li><a href="https://www.finops.org/framework/scope/finops-for-ai/" target="_blank" rel="noreferrer">FinOps for AI (FinOps Foundation)</a></li>
-          </ul>
+          <ul id="decisionList" class="clean-list"></ul>
         </article>
       </aside>
     </main>
 
-    <script type="module" src="./app.js"></script>
+    <script type="module" src="./dashboard.js"></script>
   </body>
 </html>

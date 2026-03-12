@@ -307,7 +307,7 @@ function runCalculation() {
   refreshWeightVisualization(runtime.config);
   updateModelSummary(runtime.config);
   renderResult(report);
-  markAssessmentInProgress();
+  void markAssessmentInProgress();
   return report;
 }
 
@@ -444,7 +444,7 @@ function maybePrefillFromInitiative() {
   }
 }
 
-function loadInitiativeContext() {
+async function loadInitiativeContext() {
   runtime.initiativeId = readInitiativeIdFromUrl();
   if (!runtime.initiativeId) {
     renderInitiativeContext();
@@ -455,7 +455,11 @@ function loadInitiativeContext() {
     return;
   }
 
-  runtime.initiative = getInitiativeById(runtime.initiativeId);
+  try {
+    runtime.initiative = await getInitiativeById(runtime.initiativeId);
+  } catch {
+    runtime.initiative = null;
+  }
   if (!runtime.initiative) {
     renderInitiativeContext();
     if (el.saveAssessmentButton) {
@@ -465,14 +469,18 @@ function loadInitiativeContext() {
   }
 
   if (runtime.initiative.status === "submitted") {
-    const updated = setInitiativeStatus(
-      runtime.initiative.id,
-      "triage",
-      "reviewer",
-      "Initiative opened in assessment workspace."
-    );
-    if (updated) {
-      runtime.initiative = updated;
+    try {
+      const updated = await setInitiativeStatus(
+        runtime.initiative.id,
+        "triage",
+        "reviewer",
+        "Initiative opened in assessment workspace."
+      );
+      if (updated) {
+        runtime.initiative = updated;
+      }
+    } catch {
+      // Keep rendering initiative context even if the transition could not be persisted.
     }
   }
 
@@ -480,25 +488,29 @@ function loadInitiativeContext() {
   renderInitiativeContext();
 }
 
-function markAssessmentInProgress() {
+async function markAssessmentInProgress() {
   if (!runtime.initiative || !runtime.initiativeId) {
     return;
   }
   if (runtime.initiative.status === "triage" || runtime.initiative.status === "submitted") {
-    const updated = setInitiativeStatus(
-      runtime.initiative.id,
-      "assessment",
-      "reviewer",
-      "Assessment scoring started."
-    );
-    if (updated) {
-      runtime.initiative = updated;
-      renderInitiativeContext();
+    try {
+      const updated = await setInitiativeStatus(
+        runtime.initiative.id,
+        "assessment",
+        "reviewer",
+        "Assessment scoring started."
+      );
+      if (updated) {
+        runtime.initiative = updated;
+        renderInitiativeContext();
+      }
+    } catch {
+      // Non-blocking for local decision analysis.
     }
   }
 }
 
-function saveAssessment() {
+async function saveAssessment() {
   if (!runtime.initiativeId) {
     setAssessmentStatus("No linked initiative. Open assessment from Triage Queue.", "status-warn");
     return;
@@ -520,7 +532,13 @@ function saveAssessment() {
     reportText: report.text,
     configSnapshot: report.configSnapshot,
   };
-  const updated = saveInitiativeAssessment(runtime.initiativeId, assessmentPayload, "reviewer");
+  let updated = null;
+  try {
+    updated = await saveInitiativeAssessment(runtime.initiativeId, assessmentPayload, "reviewer");
+  } catch (error) {
+    setAssessmentStatus(error?.message || "Failed to save assessment.", "status-warn");
+    return;
+  }
   if (!updated) {
     setAssessmentStatus("Failed to save assessment. Initiative not found.", "status-warn");
     return;
@@ -536,12 +554,14 @@ function saveAssessment() {
 renderCriteria();
 bindCriteriaListeners();
 resetForm();
-loadInitiativeContext();
+void loadInitiativeContext();
 el.runButton.addEventListener("click", runCalculation);
 el.copyButton.addEventListener("click", copyReport);
 el.resetButton.addEventListener("click", resetForm);
 if (el.saveAssessmentButton) {
-  el.saveAssessmentButton.addEventListener("click", saveAssessment);
+  el.saveAssessmentButton.addEventListener("click", async () => {
+    await saveAssessment();
+  });
 }
 if (el.normalizeWeightsButton) {
   el.normalizeWeightsButton.addEventListener("click", normalizeWeightsInUI);

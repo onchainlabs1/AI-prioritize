@@ -1,6 +1,16 @@
 # Changelog
 
+## 0.3.3 - 2026-03-12
+- Applied a cleaner, modernized UI pass with a Linear-inspired visual direction.
+- Simplified top navigation labels across pages (`Assessment`, `Admin`, `Method`).
+- Removed redundant assessment hero actions to reduce visual noise.
+- Kept the home dashboard focused as a portfolio command center.
+- Refreshed documentation to match the current navigation, pages, and run instructions.
+
 ## 0.3.2 - 2026-03-12
+- Added SQLite persistence (`data/initiatives.db`) with a Python API server (`server.py`).
+- Migrated initiative data flow from browser local storage to backend REST endpoints.
+- Redesigned `index.html` as a cleaner home dashboard and moved scoring flow to `assessment.html`.
 - Added initiative payload normalization and required-field/email validation.
 - Added workflow transition guardrails via an explicit status state machine.
 - Hardened queue/board rendering to avoid raw HTML interpolation for user input.

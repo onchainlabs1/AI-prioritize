@@ -5,3 +5,8 @@ dist/
 build/
 .idea/
 .vscode/
+__pycache__/
+*.pyc
+enterprise-ai-prioritizer/data/*.db
+enterprise-ai-prioritizer/data/*.sqlite
+enterprise-ai-prioritizer/data/*.sqlite3

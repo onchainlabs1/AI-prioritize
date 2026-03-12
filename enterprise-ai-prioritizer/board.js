@@ -39,16 +39,28 @@ function setBoardStatus(message, cssClass = "") {
 }
 
 function boardCandidates() {
-  return listInitiatives().filter((initiative) => {
+  return listInitiatives().then((initiatives) =>
+    initiatives.filter((initiative) => {
     if (targetId && initiative.id === targetId) {
       return true;
     }
     return ACTIVE_STATUSES.has(initiative.status);
-  });
+    })
+  );
 }
 
-function render() {
-  const initiatives = boardCandidates();
+async function render() {
+  let initiatives = [];
+  try {
+    initiatives = await boardCandidates();
+  } catch (error) {
+    el.boardCount.textContent = "0";
+    el.boardList.innerHTML = "";
+    el.boardList.appendChild(
+      createElement("p", "hint status-warn", error?.message || "Failed to load board queue.")
+    );
+    return;
+  }
   el.boardCount.textContent = `${initiatives.length}`;
   el.boardList.innerHTML = "";
 
@@ -102,10 +114,16 @@ function render() {
     const actions = createElement("div", "actions");
     const saveButton = createElement("button", "", "Save decision");
     saveButton.type = "button";
-    saveButton.addEventListener("click", () => {
+    saveButton.addEventListener("click", async () => {
       const decision = decisionSelect.value;
       const rationaleValue = rationaleInput.value || "";
-      const updated = saveBoardDecision(initiative.id, decision, rationaleValue, "board.reviewer");
+      let updated = null;
+      try {
+        updated = await saveBoardDecision(initiative.id, decision, rationaleValue, "board.reviewer");
+      } catch (error) {
+        setBoardStatus(error?.message || `Could not save decision for ${initiative.id}.`, "status-warn");
+        return;
+      }
       if (!updated) {
         setBoardStatus(
           `Could not save decision for ${initiative.id}. Check workflow status and decision compatibility.`,
@@ -114,11 +132,11 @@ function render() {
         return;
       }
       setBoardStatus(`Board decision saved for ${initiative.id}. Current status: ${updated.status}.`, "status-ok");
-      render();
+      await render();
     });
 
     const assessmentLink = createElement("a", "btn-link", "Open Assessment");
-    assessmentLink.href = `./index.html?id=${encodeURIComponent(initiative.id)}`;
+    assessmentLink.href = `./assessment.html?id=${encodeURIComponent(initiative.id)}`;
 
     header.appendChild(title);
     header.appendChild(status);
@@ -133,4 +151,4 @@ function render() {
   });
 }
 
-render();
+void render();

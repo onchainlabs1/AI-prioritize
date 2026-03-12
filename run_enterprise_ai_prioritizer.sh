@@ -2,4 +2,4 @@
 set -euo pipefail
 
 cd "/Users/fabio/Documents/ai-architect-decision-workbench/enterprise-ai-prioritizer"
-python3 -m http.server 8787
+python3 server.py --host 127.0.0.1 --port 8787

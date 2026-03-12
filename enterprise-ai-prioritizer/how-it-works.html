@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>How It Works</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="hero-shell">
+      <div class="hero-glow one"></div>
+      <div class="hero-glow two"></div>
+      <div class="hero">
+        <p class="eyebrow">AI Initiative Prioritization Workbench</p>
+        <h1>How the platform works</h1>
+        <p>
+          A transparent decision workflow that converts ideas into auditable,
+          board-ready prioritization decisions.
+        </p>
+        <nav class="top-nav">
+          <a href="./index.html">Home</a>
+          <a href="./submit.html">Submit</a>
+          <a href="./triage.html">Triage Queue</a>
+          <a href="./board.html">Board View</a>
+          <a href="./assessment.html">Assessment</a>
+          <a href="./config.html">Admin</a>
+          <a href="./how-it-works.html" class="active">Method</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="workspace config-workspace">
+      <section class="main-column">
+        <article class="panel">
+          <div class="panel-head">
+            <h2>What This Tool Solves</h2>
+            <span class="tag">Purpose</span>
+          </div>
+          <p class="hint">
+            The workbench helps enterprise teams avoid AI hype decisions by
+            applying a clear method:
+          </p>
+          <ul class="clean-list">
+            <li>collect initiatives with structured business context;</li>
+            <li>filter ideas that should not use AI (Stage 0);</li>
+            <li>enforce governance gates before scoring;</li>
+            <li>prioritize with configurable weighted criteria;</li>
+            <li>record board decisions with audit trail.</li>
+          </ul>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Workflow Diagram</h2>
+            <span class="tag">Decision Flow</span>
+          </div>
+          <div class="workflow-rail" aria-label="Tool workflow">
+            <article class="workflow-card">
+              <span class="workflow-step-id">1</span>
+              <h3>Submit Idea</h3>
+              <p>Requester provides business problem, owner, KPI, and data context.</p>
+            </article>
+            <article class="workflow-card">
+              <span class="workflow-step-id">2</span>
+              <h3>Triage Queue</h3>
+              <p>Reviewers filter by status, unit, lane, and owner to route work.</p>
+            </article>
+            <article class="workflow-card">
+              <span class="workflow-step-id">3</span>
+              <h3>Stage 0 + Gates</h3>
+              <p>Check AI appropriateness and mandatory Pass/Conditional/Fail gates.</p>
+            </article>
+            <article class="workflow-card">
+              <span class="workflow-step-id">4</span>
+              <h3>Weighted Scoring</h3>
+              <p>Score impact, feasibility, economics, risk, and readiness.</p>
+            </article>
+            <article class="workflow-card">
+              <span class="workflow-step-id">5</span>
+              <h3>Board Decision</h3>
+              <p>Approve, hold, reject, or approve with conditions and rationale.</p>
+            </article>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Decision Logic Summary</h2>
+            <span class="tag">Method</span>
+          </div>
+          <div class="grid three">
+            <div class="mini-card">
+              <strong>Stage 0</strong>
+              <p>Does this initiative really need AI, or should it be automation/analytics first?</p>
+            </div>
+            <div class="mini-card">
+              <strong>Gates</strong>
+              <p>Fail blocks progress. Conditional applies penalty and policy tier limits.</p>
+            </div>
+            <div class="mini-card">
+              <strong>Scoring</strong>
+              <p>Weighted criteria + evidence confidence produce final lane recommendation.</p>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <aside class="side-column">
+        <article class="panel side">
+          <div class="panel-head">
+            <h2>Key Outputs</h2>
+            <span class="tag">Executive View</span>
+          </div>
+          <ul class="clean-list">
+            <li>Priority lane (`Tier A`, `Tier B`, `Tier C`, `NO-GO`)</li>
+            <li>Explainable score breakdown</li>
+            <li>Gate status and rationale</li>
+            <li>Board decision history</li>
+            <li>Audit trail per initiative</li>
+          </ul>
+        </article>
+
+        <article class="panel side">
+          <div class="panel-head">
+            <h2>Where to Start</h2>
+          </div>
+          <div class="actions">
+            <a class="btn-link" href="./submit.html">Open Submit Form</a>
+            <a class="btn-link" href="./triage.html">Open Triage Queue</a>
+            <a class="btn-link" href="./assessment.html">Open Assessment</a>
+          </div>
+        </article>
+      </aside>
+    </main>
+  </body>
+</html>

@@ -4,133 +4,54 @@ import assert from "node:assert/strict";
 import {
   canTransitionStatus,
   createInitiative,
-  getInitiativeById,
-  listInitiatives,
   normalizeInitiativePayload,
-  saveBoardDecision,
-  saveInitiativeAssessment,
-  setInitiativeStatus,
   validateInitiativePayload,
 } from "../initiative-store.js";
 
-function localStorageMock() {
-  const store = new Map();
+function mockJsonResponse(body, status = 200) {
   return {
-    getItem(key) {
-      return store.has(key) ? store.get(key) : null;
-    },
-    setItem(key, value) {
-      store.set(key, String(value));
-    },
-    removeItem(key) {
-      store.delete(key);
-    },
-    clear() {
-      store.clear();
+    ok: status >= 200 && status < 300,
+    status,
+    async json() {
+      return body;
     },
   };
 }
 
-test.beforeEach(() => {
-  globalThis.localStorage = localStorageMock();
-});
-
 test.afterEach(() => {
-  delete globalThis.localStorage;
+  delete globalThis.fetch;
 });
 
-test("createInitiative stores a submitted intake record with audit trail", () => {
-  const created = createInitiative({
-    title: "Automate contract summarization",
-    businessUnit: "Legal",
-    requesterName: "Ana",
-    requesterEmail: "ana@company.com",
-    businessOwner: "Head of Legal Ops",
-    problemDescription: "Contract review and summary are manually prepared.",
-    expectedOutcome: "Faster contract turnaround and reduced legal effort.",
+test("normalizeInitiativePayload trims and normalizes fields", () => {
+  const normalized = normalizeInitiativePayload({
+    title: "  Reduce    invoice work ",
+    businessUnit: " Finance ",
+    requesterName: " Alice ",
+    requesterEmail: " ALICE@COMPANY.COM ",
+    businessOwner: " CFO office ",
+    problemDescription: "  Manual process ",
+    expectedOutcome: " Faster cycle ",
+    owner: " architecture.board ",
   });
 
-  assert.match(created.id, /^AII-\d{4}-\d{4}$/);
-  assert.equal(created.status, "submitted");
-  assert.equal(created.priorityLane, "Unassessed");
-  assert.equal(created.auditTrail.length, 1);
-  assert.equal(created.auditTrail[0].action, "initiative_created");
-
-  const listed = listInitiatives();
-  assert.equal(listed.length, 1);
-  assert.equal(listed[0].id, created.id);
-});
-
-test("assessment save updates lane/score and routes initiative to board_review", () => {
-  const created = createInitiative({
-    title: "Service desk copilot",
-    businessUnit: "IT",
-    requesterName: "John Reviewer",
-    requesterEmail: "john.reviewer@company.com",
-    businessOwner: "Head of IT",
-    problemDescription: "Tickets are manually triaged and responses are inconsistent.",
-    expectedOutcome: "Faster and more consistent service desk responses.",
-  });
-
-  const updated = saveInitiativeAssessment(created.id, {
-    stage0Choice: "genai_rag",
-    classification: {
-      tier: "A",
-      lane: "Prioritize now",
-      css: "good",
-      rationale: "Strong value and readiness.",
-    },
-    score: 82.5,
-  });
-
-  assert.ok(updated);
-  assert.equal(updated.status, "board_review");
-  assert.equal(updated.stage0Classification, "genai_rag");
-  assert.equal(updated.priorityLane, "Prioritize now");
-  assert.equal(updated.finalScore, 82.5);
-  assert.equal(updated.auditTrail[0].action, "assessment_saved");
-});
-
-test("board decision persists rationale and maps to final workflow status", () => {
-  const created = createInitiative({
-    title: "Finance close variance assistant",
-    businessUnit: "Finance",
-    requesterName: "Maria Controller",
-    requesterEmail: "maria.controller@company.com",
-    businessOwner: "Finance VP",
-    problemDescription: "Monthly close variance checks are manual and delayed.",
-    expectedOutcome: "Automated variance checks with early anomaly detection.",
-  });
-
-  setInitiativeStatus(created.id, "board_review");
-  const decided = saveBoardDecision(
-    created.id,
-    "approve_after_discovery",
-    "Approve discovery sprint before full build.",
-    "board.member"
-  );
-
-  assert.ok(decided);
-  assert.equal(decided.status, "approved_with_conditions");
-  assert.equal(decided.boardDecision?.decision, "approve_after_discovery");
-  assert.equal(decided.boardDecision?.rationale, "Approve discovery sprint before full build.");
-
-  const reloaded = getInitiativeById(created.id);
-  assert.equal(reloaded.status, "approved_with_conditions");
-  assert.equal(reloaded.auditTrail[0].action, "board_decision_saved");
+  assert.equal(normalized.title, "Reduce invoice work");
+  assert.equal(normalized.businessUnit, "Finance");
+  assert.equal(normalized.requesterEmail, "alice@company.com");
+  assert.equal(normalized.owner, "architecture.board");
 });
 
 test("validateInitiativePayload flags missing required fields and invalid email", () => {
-  const payload = normalizeInitiativePayload({
-    title: "",
-    businessUnit: "Operations",
-    requesterName: "",
-    requesterEmail: "not-an-email",
-    businessOwner: "",
-    problemDescription: "",
-    expectedOutcome: "",
-  });
-  const result = validateInitiativePayload(payload);
+  const result = validateInitiativePayload(
+    normalizeInitiativePayload({
+      title: "",
+      businessUnit: "Ops",
+      requesterName: "",
+      requesterEmail: "invalid-email",
+      businessOwner: "",
+      problemDescription: "",
+      expectedOutcome: "",
+    })
+  );
 
   assert.equal(result.valid, false);
   assert.ok(result.errors.some((error) => error.includes("title")));
@@ -138,57 +59,56 @@ test("validateInitiativePayload flags missing required fields and invalid email"
   assert.ok(result.errors.some((error) => error.includes("requesterEmail")));
 });
 
-test("createInitiative sanitizes and normalizes core fields", () => {
-  const created = createInitiative({
-    title: "  Reduce     invoice manual work   ",
-    businessUnit: " Finance  ",
-    requesterName: "  Alice  ",
-    requesterEmail: "  ALICE@COMPANY.COM ",
-    businessOwner: "  CFO Office ",
-    problemDescription: "  Too many manual steps. ",
-    expectedOutcome: "  Faster cycle time. ",
-    owner: "  architecture.board ",
-  });
-
-  assert.equal(created.title, "Reduce invoice manual work");
-  assert.equal(created.businessUnit, "Finance");
-  assert.equal(created.requesterEmail, "alice@company.com");
-  assert.equal(created.owner, "architecture.board");
-});
-
-test("createInitiative throws for invalid intake payload", () => {
-  assert.throws(
-    () =>
-      createInitiative({
-        title: "Incomplete request",
-        businessUnit: "Operations",
-      }),
-    /Invalid initiative payload/
-  );
-});
-
-test("setInitiativeStatus blocks invalid transitions", () => {
-  const created = createInitiative({
-    title: "Order exception assistant",
-    businessUnit: "Operations",
-    requesterName: "Paul",
-    requesterEmail: "paul@company.com",
-    businessOwner: "Ops Director",
-    problemDescription: "Order exceptions are escalated too late.",
-    expectedOutcome: "Earlier exception detection and routing.",
-  });
-
-  const invalidJump = setInitiativeStatus(created.id, "approved");
-  assert.equal(invalidJump, null);
-
-  const validStep = setInitiativeStatus(created.id, "triage");
-  assert.ok(validStep);
-  assert.equal(validStep.status, "triage");
-});
-
 test("canTransitionStatus follows configured workflow rules", () => {
   assert.equal(canTransitionStatus("submitted", "triage"), true);
   assert.equal(canTransitionStatus("submitted", "approved"), false);
   assert.equal(canTransitionStatus("board_review", "approved"), true);
   assert.equal(canTransitionStatus("closed", "triage"), false);
+});
+
+test("createInitiative calls API with normalized payload", async () => {
+  let capturedUrl = "";
+  let capturedOptions = null;
+
+  globalThis.fetch = async (url, options) => {
+    capturedUrl = url;
+    capturedOptions = options;
+    return mockJsonResponse({ id: "AII-2026-0001", status: "submitted" }, 201);
+  };
+
+  const created = await createInitiative(
+    {
+      title: "  Service Desk Copilot ",
+      businessUnit: " IT ",
+      requesterName: " John ",
+      requesterEmail: " JOHN@COMPANY.COM ",
+      businessOwner: "Head of IT",
+      problemDescription: "Manual classification and delayed responses.",
+      expectedOutcome: "Faster triage and improved response quality.",
+    },
+    "john@company.com"
+  );
+
+  assert.equal(created.id, "AII-2026-0001");
+  assert.equal(capturedUrl, "/api/initiatives");
+  assert.equal(capturedOptions.method, "POST");
+
+  const body = JSON.parse(capturedOptions.body);
+  assert.equal(body.payload.title, "Service Desk Copilot");
+  assert.equal(body.payload.businessUnit, "IT");
+  assert.equal(body.payload.requesterEmail, "john@company.com");
+});
+
+test("createInitiative throws validation error before API call", async () => {
+  globalThis.fetch = async () => {
+    throw new Error("fetch should not be called");
+  };
+
+  await assert.rejects(
+    () =>
+      createInitiative({
+        title: "missing required",
+      }),
+    /Invalid initiative payload/
+  );
 });

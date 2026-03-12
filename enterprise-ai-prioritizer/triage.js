@@ -27,8 +27,8 @@ function createElement(tag, className, text) {
   return node;
 }
 
-function populateStaticFilters() {
-  const stats = getQueueStats();
+async function populateStaticFilters() {
+  const stats = await getQueueStats();
   WORKFLOW_STATUSES.forEach((status) => {
     const option = document.createElement("option");
     option.value = status;
@@ -36,14 +36,16 @@ function populateStaticFilters() {
     el.filterStatus.appendChild(option);
   });
 
-  listBusinessUnits().forEach((unit) => {
+  const units = await listBusinessUnits();
+  units.forEach((unit) => {
     const option = document.createElement("option");
     option.value = unit;
     option.textContent = unit;
     el.filterBusinessUnit.appendChild(option);
   });
 
-  listOwners().forEach((owner) => {
+  const owners = await listOwners();
+  owners.forEach((owner) => {
     const option = document.createElement("option");
     option.value = owner;
     option.textContent = owner;
@@ -59,7 +61,7 @@ function formatDate(value) {
   }
 }
 
-function renderList() {
+async function renderList() {
   const filters = {
     search: el.filterSearch.value.trim(),
     status: el.filterStatus.value,
@@ -67,7 +69,17 @@ function renderList() {
     lane: el.filterLane.value,
     owner: el.filterOwner.value,
   };
-  const initiatives = listInitiatives(filters);
+  let initiatives = [];
+  try {
+    initiatives = await listInitiatives(filters);
+  } catch (error) {
+    el.resultCount.textContent = "0";
+    el.queueList.innerHTML = "";
+    el.queueList.appendChild(
+      createElement("p", "hint status-warn", error?.message || "Failed to load initiatives.")
+    );
+    return;
+  }
   el.resultCount.textContent = `${initiatives.length}`;
 
   el.queueList.innerHTML = "";
@@ -93,7 +105,7 @@ function renderList() {
     );
     const actions = createElement("div", "actions");
     const assessmentLink = createElement("a", "btn-link", "Open Assessment");
-    assessmentLink.href = `./index.html?id=${encodeURIComponent(initiative.id)}`;
+    assessmentLink.href = `./assessment.html?id=${encodeURIComponent(initiative.id)}`;
     const boardLink = createElement("a", "btn-link", "Open Board View");
     boardLink.href = `./board.html?id=${encodeURIComponent(initiative.id)}`;
 
@@ -111,11 +123,27 @@ function renderList() {
 
 function bindEvents() {
   [el.filterSearch, el.filterStatus, el.filterBusinessUnit, el.filterLane, el.filterOwner].forEach((field) => {
-    field.addEventListener("input", renderList);
-    field.addEventListener("change", renderList);
+    field.addEventListener("input", () => {
+      void renderList();
+    });
+    field.addEventListener("change", () => {
+      void renderList();
+    });
   });
 }
 
-populateStaticFilters();
-bindEvents();
-renderList();
+async function init() {
+  try {
+    await populateStaticFilters();
+    bindEvents();
+    await renderList();
+  } catch (error) {
+    el.resultCount.textContent = "0";
+    el.queueList.innerHTML = "";
+    el.queueList.appendChild(
+      createElement("p", "hint status-warn", error?.message || "Failed to initialize triage queue.")
+    );
+  }
+}
+
+void init();

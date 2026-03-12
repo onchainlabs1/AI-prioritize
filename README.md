@@ -4,7 +4,7 @@ Decision-support system for AI portfolio governance in enterprise environments.
 
 This portfolio project demonstrates how to prioritize AI initiatives with a transparent, auditable, and configurable methodology instead of ad-hoc judgment.
 
-Current version: `0.3.2`
+Current version: `0.3.3`
 
 ## Project objective
 Enable architecture and governance teams to answer:
@@ -83,7 +83,12 @@ Enable architecture and governance teams to answer:
   - weights and evidence used
   - config snapshot at decision time
 
-9. **Unit-tested decision engine**
+9. **SQLite-backed initiative persistence**
+- initiatives are stored in `enterprise-ai-prioritizer/data/initiatives.db`
+- backend API is served by `enterprise-ai-prioritizer/server.py`
+- workflow updates and board decisions are persisted outside browser memory
+
+10. **Unit-tested decision engine**
 - deterministic tests for:
   - score clamping
   - weight normalization
@@ -91,12 +96,17 @@ Enable architecture and governance teams to answer:
   - tier mapping and caps
   - stage 0 blocking rules
 
-10. **Software engineering hardening**
+11. **Software engineering hardening**
 - intake payload validation and sanitization
 - explicit workflow state machine with transition guardrails
 - safer DOM rendering for user-entered data in queue/board pages
 - bounded audit history retention
 - immutable identity fields on initiative updates
+
+12. **Modern enterprise UI pass**
+- simplified home as portfolio command center
+- dedicated assessment workspace page for daily scoring decisions
+- cleaner, Linear-inspired component styling and simplified navigation labels
 
 ## Selection logic (detailed)
 
@@ -144,20 +154,26 @@ Formulas:
 4. If any gate is `Conditional`, tier is capped by policy (default cap: `B`)
 
 ## UI pages
-1. `submit.html` (idea intake)
+1. `index.html` (home dashboard)
+- portfolio snapshot, priority queue, alerts, and recent decisions
+
+2. `submit.html` (idea intake)
 - structured form for idea collection
 
-2. `triage.html` (triage queue)
+3. `triage.html` (triage queue)
 - filters + quick routing to assessment and board
 
-3. `index.html` (assessment workspace)
+4. `assessment.html` (assessment workspace)
 - context + Stage 0 + gates + scoring + executive output + assessment save
 
-4. `board.html` (board view)
+5. `board.html` (board view)
 - lane/score review + decision + rationale
 
-5. `config.html` (configuration console)
+6. `config.html` (configuration console)
 - defaults and model behavior tuning
+
+7. `how-it-works.html` (method page)
+- workflow explanation and governance decision flow
 
 ## Engineering Controls
 1. **Data validation**
@@ -174,20 +190,23 @@ Formulas:
 
 4. **Auditability**
 - all major state changes write an audit event with actor, action, note, and timestamp
-- audit trail is capped to avoid unbounded growth in local storage
+- audit trail is capped to avoid unbounded growth in SQLite
 
 ## Repository structure
 ```text
 .
 ├── enterprise-ai-prioritizer/
 │   ├── app.js
+│   ├── assessment.html
 │   ├── board.html
 │   ├── board.js
 │   ├── config.html
 │   ├── config.js
+│   ├── dashboard.js
 │   ├── decision-engine.js
 │   ├── index.html
 │   ├── initiative-store.js
+│   ├── server.py
 │   ├── settings.js
 │   ├── submit.html
 │   ├── submit.js
@@ -214,13 +233,14 @@ Formulas:
 ### Start app
 ```bash
 cd enterprise-ai-prioritizer
-python3 -m http.server 8787 --bind 127.0.0.1
+python3 server.py --host 127.0.0.1 --port 8787
 ```
 
 Open:
+- `http://127.0.0.1:8787/index.html` (home dashboard)
 - `http://127.0.0.1:8787/submit.html` (intake)
 - `http://127.0.0.1:8787/triage.html` (triage)
-- `http://127.0.0.1:8787/index.html` (assessment)
+- `http://127.0.0.1:8787/assessment.html` (assessment)
 - `http://127.0.0.1:8787/board.html` (board)
 - `http://127.0.0.1:8787/config.html` (config)
 
@@ -238,7 +258,7 @@ npm test
 Test coverage currently validates:
 1. decision scoring engine behavior
 2. gate and lane mapping logic
-3. initiative persistence lifecycle
+3. initiative API client and payload validation
 4. payload validation and sanitization
 5. workflow transition restrictions
 
