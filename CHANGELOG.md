@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.2 - 2026-03-12
+- Added initiative payload normalization and required-field/email validation.
+- Added workflow transition guardrails via an explicit status state machine.
+- Hardened queue/board rendering to avoid raw HTML interpolation for user input.
+- Improved board UX with explicit status feedback for invalid decision transitions.
+- Expanded unit tests for initiative-store validation and workflow behavior.
+- Refreshed root/module README with engineering controls and limitations.
+
 ## 0.3.1 - 2026-03-12
 - Renamed remaining Portuguese-named files to English equivalents.
 - Updated documentation and script references to the new English file names.

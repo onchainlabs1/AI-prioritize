@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Triage Queue</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="hero-shell">
+      <div class="hero">
+        <p class="eyebrow">AI Initiative Prioritization Workbench</p>
+        <h1>Triage Queue</h1>
+        <p>
+          Filter and route initiatives for assessment and board review.
+        </p>
+        <nav class="top-nav">
+          <a href="./submit.html">Submit</a>
+          <a href="./triage.html" class="active">Triage Queue</a>
+          <a href="./board.html">Board View</a>
+          <a href="./index.html">Initiative Assessment</a>
+          <a href="./config.html">Admin Config</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="workspace config-workspace">
+      <section class="main-column">
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Queue Filters</h2>
+            <span class="tag">Queue</span>
+          </div>
+          <div class="grid five">
+            <label>
+              Search
+              <input id="filterSearch" type="text" placeholder="ID, title, owner..." />
+            </label>
+            <label>
+              Status
+              <select id="filterStatus">
+                <option value="all">All</option>
+              </select>
+            </label>
+            <label>
+              Business unit
+              <select id="filterBusinessUnit">
+                <option value="all">All</option>
+              </select>
+            </label>
+            <label>
+              Lane
+              <select id="filterLane">
+                <option value="all">All</option>
+                <option value="Prioritize now">Tier A</option>
+                <option value="Plan next">Tier B</option>
+                <option value="Incubate / discovery">Tier C</option>
+                <option value="Do not prioritize now">NO-GO</option>
+                <option value="Reframe / process redesign">NO-GO (Reframe)</option>
+                <option value="Unassessed">Unassessed</option>
+              </select>
+            </label>
+            <label>
+              Owner
+              <select id="filterOwner">
+                <option value="all">All</option>
+              </select>
+            </label>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Initiatives</h2>
+            <span id="resultCount" class="tag">0</span>
+          </div>
+          <div id="queueList" class="queue-list"></div>
+        </article>
+      </section>
+    </main>
+
+    <script type="module" src="./triage.js"></script>
+  </body>
+</html>

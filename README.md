@@ -4,7 +4,7 @@ Decision-support system for AI portfolio governance in enterprise environments.
 
 This portfolio project demonstrates how to prioritize AI initiatives with a transparent, auditable, and configurable methodology instead of ad-hoc judgment.
 
-Current version: `0.3.1`
+Current version: `0.3.2`
 
 ## Project objective
 Enable architecture and governance teams to answer:
@@ -52,13 +52,51 @@ Enable architecture and governance teams to answer:
 - gate outcomes and pending conditions
 - criterion-level breakdown (score, evidence, multiplier, contribution)
 
-7. **Unit-tested decision engine**
+7. **Initiative intake and workflow**
+- structured idea submission form
+- triage queue with filters (status, BU, lane, owner)
+- assessment page linked by initiative ID (`?id=...`)
+- board decision page with rationale capture
+- workflow states:
+  - `draft`
+  - `submitted`
+  - `triage`
+  - `assessment`
+  - `board_review`
+  - `approved`
+  - `approved_with_conditions`
+  - `hold`
+  - `rejected`
+  - `in_delivery`
+  - `closed`
+
+8. **Auditability and snapshots**
+- audit trail entries for key actions:
+  - initiative creation
+  - status changes
+  - assessment saves
+  - board decisions
+- persisted assessment snapshot includes:
+  - Stage 0 outcome
+  - gates
+  - score details
+  - weights and evidence used
+  - config snapshot at decision time
+
+9. **Unit-tested decision engine**
 - deterministic tests for:
   - score clamping
   - weight normalization
   - gate tri-state behavior
   - tier mapping and caps
   - stage 0 blocking rules
+
+10. **Software engineering hardening**
+- intake payload validation and sanitization
+- explicit workflow state machine with transition guardrails
+- safer DOM rendering for user-entered data in queue/board pages
+- bounded audit history retention
+- immutable identity fields on initiative updates
 
 ## Selection logic (detailed)
 
@@ -106,26 +144,60 @@ Formulas:
 4. If any gate is `Conditional`, tier is capped by policy (default cap: `B`)
 
 ## UI pages
-1. `index.html` (main decision workspace)
-- context + Stage 0 + gates + scoring + executive output
+1. `submit.html` (idea intake)
+- structured form for idea collection
 
-2. `config.html` (configuration console)
+2. `triage.html` (triage queue)
+- filters + quick routing to assessment and board
+
+3. `index.html` (assessment workspace)
+- context + Stage 0 + gates + scoring + executive output + assessment save
+
+4. `board.html` (board view)
+- lane/score review + decision + rationale
+
+5. `config.html` (configuration console)
 - defaults and model behavior tuning
+
+## Engineering Controls
+1. **Data validation**
+- required fields are enforced for initiative creation
+- email format is checked
+- per-field maximum length is enforced for stored text
+
+2. **State integrity**
+- status changes are validated against allowed transitions
+- board decisions fail fast if transition is invalid
+
+3. **Rendering safety**
+- user data in queue/board pages is rendered via `textContent` instead of raw HTML interpolation
+
+4. **Auditability**
+- all major state changes write an audit event with actor, action, note, and timestamp
+- audit trail is capped to avoid unbounded growth in local storage
 
 ## Repository structure
 ```text
 .
 ├── enterprise-ai-prioritizer/
 │   ├── app.js
+│   ├── board.html
+│   ├── board.js
 │   ├── config.html
 │   ├── config.js
 │   ├── decision-engine.js
 │   ├── index.html
+│   ├── initiative-store.js
 │   ├── settings.js
+│   ├── submit.html
+│   ├── submit.js
 │   ├── styles.css
+│   ├── triage.html
+│   ├── triage.js
 │   ├── README.md
 │   └── tests/
-│       └── decision-engine.test.js
+│       ├── decision-engine.test.js
+│       └── initiative-store.test.js
 ├── CHANGELOG.md
 ├── VERSION
 ├── package.json
@@ -146,7 +218,10 @@ python3 -m http.server 8787 --bind 127.0.0.1
 ```
 
 Open:
-- `http://127.0.0.1:8787` (main)
+- `http://127.0.0.1:8787/submit.html` (intake)
+- `http://127.0.0.1:8787/triage.html` (triage)
+- `http://127.0.0.1:8787/index.html` (assessment)
+- `http://127.0.0.1:8787/board.html` (board)
 - `http://127.0.0.1:8787/config.html` (config)
 
 Alternative:
@@ -159,6 +234,13 @@ From repository root:
 ```bash
 npm test
 ```
+
+Test coverage currently validates:
+1. decision scoring engine behavior
+2. gate and lane mapping logic
+3. initiative persistence lifecycle
+4. payload validation and sanitization
+5. workflow transition restrictions
 
 ## Best-practice baseline (Mar 2026)
 Model design is aligned to:

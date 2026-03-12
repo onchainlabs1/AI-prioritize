@@ -23,6 +23,13 @@
           Decision-support system for AI portfolio governance with Stage 0 fit
           check, tri-state gates, weighted scoring, and confidence-aware output.
         </p>
+        <nav class="top-nav">
+          <a href="./submit.html">Submit</a>
+          <a href="./triage.html">Triage Queue</a>
+          <a href="./board.html">Board View</a>
+          <a href="./index.html" class="active">Initiative Assessment</a>
+          <a href="./config.html">Admin Config</a>
+        </nav>
         <div class="hero-stats">
           <article>
             <strong>Stage 0</strong>
@@ -38,6 +45,8 @@
           </article>
         </div>
         <div class="hero-actions">
+          <a class="hero-link" href="./submit.html">Submit New Idea</a>
+          <a class="hero-link" href="./triage.html">Open Triage Queue</a>
           <a class="hero-link" href="./config.html">Open Configuration</a>
         </div>
       </div>
@@ -45,6 +54,16 @@
 
     <main class="workspace">
       <section class="main-column">
+        <article class="panel" style="--delay: 0ms">
+          <div class="panel-head">
+            <h2>Initiative Context</h2>
+            <span class="tag">Record</span>
+          </div>
+          <p id="initiativeContext" class="hint">
+            Open this page with `?id=<initiative-id>` from Triage Queue to save an auditable assessment.
+          </p>
+        </article>
+
         <article class="panel" style="--delay: 0ms">
           <div class="panel-head">
             <h2>01. Project Context</h2>
@@ -170,9 +189,11 @@
           <p id="modelSummary" class="hint"></p>
           <div class="actions">
             <button id="runButton">Calculate Priority</button>
+            <button id="saveAssessmentButton" class="secondary">Save Assessment</button>
             <button id="copyButton" class="secondary">Copy Report</button>
             <button id="resetButton" class="secondary">Reset</button>
           </div>
+          <p id="assessmentStatus" class="hint"></p>
 
           <div class="decision-strip">
             <div class="metric">

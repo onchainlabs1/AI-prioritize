@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Board View</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="hero-shell">
+      <div class="hero">
+        <p class="eyebrow">AI Initiative Prioritization Workbench</p>
+        <h1>Board View</h1>
+        <p>
+          Review scored initiatives, evaluate rationale, and record portfolio decisions.
+        </p>
+        <nav class="top-nav">
+          <a href="./submit.html">Submit</a>
+          <a href="./triage.html">Triage Queue</a>
+          <a href="./board.html" class="active">Board View</a>
+          <a href="./index.html">Initiative Assessment</a>
+          <a href="./config.html">Admin Config</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="workspace config-workspace">
+      <section class="main-column">
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Board Decision Queue</h2>
+            <span id="boardCount" class="tag">0</span>
+          </div>
+          <p class="hint">
+            Default queue focuses on initiatives in `board_review`, `assessment`, and `hold`.
+          </p>
+          <p id="boardStatus" class="hint"></p>
+          <div id="boardList" class="queue-list"></div>
+        </article>
+      </section>
+    </main>
+
+    <script type="module" src="./board.js"></script>
+  </body>
+</html>
