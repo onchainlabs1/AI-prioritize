@@ -3,10 +3,16 @@ import assert from "node:assert/strict";
 
 import {
   CRITERIA,
+  DEFAULT_CONFIG,
+  applyWeightOverrides,
   clampScore,
   classify,
   getGateStatus,
   getScores,
+  mergeWithDefaultConfig,
+  normalizeCriteriaWeights,
+  sanitizeEvidenceLevel,
+  sanitizeWeight,
   useCaseHint,
 } from "../decision-engine.js";
 
@@ -19,78 +25,118 @@ test("clampScore bounds values into 1..5", () => {
   assert.equal(clampScore("not-a-number"), 1);
 });
 
-test("getGateStatus returns OK when all gates pass", () => {
-  const result = getGateStatus({
-    regulatory: true,
-    security: true,
-    data: true,
-    economics: true,
-  });
-
-  assert.equal(result.ok, true);
-  assert.deepEqual(result.failed, []);
+test("sanitizeWeight keeps non-negative numeric values only", () => {
+  assert.equal(sanitizeWeight(10), 10);
+  assert.equal(sanitizeWeight(-4), 0);
+  assert.equal(sanitizeWeight("x"), 0);
 });
 
-test("getGateStatus reports failed gates in deterministic order", () => {
-  const result = getGateStatus({
-    regulatory: false,
-    security: true,
-    data: false,
-    economics: false,
+test("sanitizeEvidenceLevel returns partial fallback", () => {
+  assert.equal(sanitizeEvidenceLevel("assumed"), "assumed");
+  assert.equal(sanitizeEvidenceLevel("validated"), "validated");
+  assert.equal(sanitizeEvidenceLevel("unknown"), "partial");
+});
+
+test("mergeWithDefaultConfig enforces threshold consistency", () => {
+  const merged = mergeWithDefaultConfig({
+    thresholds: { tierA: 70, tierB: 90 },
   });
+  assert.equal(merged.thresholds.tierA, 70);
+  assert.equal(merged.thresholds.tierB, 70);
+});
+
+test("getGateStatus supports pass/conditional/fail", () => {
+  const result = getGateStatus(
+    {
+      regulatory: "pass",
+      security: "conditional",
+      data: "fail",
+      economics: "conditional",
+    },
+    DEFAULT_CONFIG
+  );
 
   assert.equal(result.ok, false);
-  assert.deepEqual(result.failed, [
-    "Regulatory risk classification",
-    "Data governance",
-    "KPI + baseline + economics",
-  ]);
+  assert.equal(result.failCount, 1);
+  assert.equal(result.conditionalCount, 2);
+  assert.deepEqual(result.failed, ["Data governance readiness"]);
+  assert.equal(result.penalty, DEFAULT_CONFIG.gates.conditionalPenalty * 2);
 });
 
-test("getScores returns 100 when all criteria are 5", () => {
+test("getScores returns 100 when all criteria are 5 and evidence is validated", () => {
   const scoreInput = Object.fromEntries(CRITERIA.map((c) => [c.key, 5]));
-  const result = getScores(scoreInput);
+  const evidenceInput = Object.fromEntries(CRITERIA.map((c) => [c.key, "validated"]));
+  const result = getScores(scoreInput, CRITERIA, evidenceInput, DEFAULT_CONFIG);
 
   assert.equal(result.total, 100);
   assert.equal(result.details.length, CRITERIA.length);
 });
 
-test("getScores returns 20 when all criteria are 1", () => {
-  const scoreInput = Object.fromEntries(CRITERIA.map((c) => [c.key, 1]));
-  const result = getScores(scoreInput);
+test("getScores applies evidence multiplier penalties", () => {
+  const scoreInput = Object.fromEntries(CRITERIA.map((c) => [c.key, 5]));
+  const evidenceInput = Object.fromEntries(CRITERIA.map((c) => [c.key, "assumed"]));
+  const result = getScores(scoreInput, CRITERIA, evidenceInput, DEFAULT_CONFIG);
 
-  assert.equal(result.total, 20);
+  assert.equal(result.total, 80);
 });
 
-test("getScores clamps invalid and out-of-range values", () => {
-  const result = getScores({
-    businessImpact: 5,
-    timeToValue: 10,
+test("applyWeightOverrides and normalizeCriteriaWeights preserve 100% effective total", () => {
+  const custom = applyWeightOverrides(CRITERIA, {
+    businessImpact: 80,
+    strategicAlignment: 20,
+    timeToValue: 0,
     platformLeverage: 0,
-    readiness: "x",
-    unitEconomics: 3,
-    adoption: 4,
-    residualRisk: -2,
+    readiness: 0,
+    unitEconomics: 0,
+    operatingReadiness: 0,
+    residualRisk: 0,
   });
+  const result = normalizeCriteriaWeights(custom);
+  const effectiveTotal = result.normalized.reduce((sum, c) => sum + c.weight, 0);
 
-  const detailByLabel = Object.fromEntries(result.details.map((d) => [d.label, d]));
-  assert.equal(detailByLabel["Time-to-value"].score, 5);
-  assert.equal(detailByLabel["Platform leverage and reuse"].score, 1);
-  assert.equal(detailByLabel["Technical and data readiness"].score, 1);
-  assert.equal(detailByLabel["Residual risk (after controls)"].score, 1);
+  assert.equal(result.rawTotal, 100);
+  assert.ok(Math.abs(effectiveTotal - 100) < 0.0001);
 });
 
-test("classify returns NO-GO when gates fail", () => {
-  const result = classify(95, false);
+test("classify returns NO-GO when stage 0 says not suitable", () => {
+  const gateStatus = getGateStatus(
+    { regulatory: "pass", security: "pass", data: "pass", economics: "pass" },
+    DEFAULT_CONFIG
+  );
+  const result = classify(95, gateStatus, "not_suitable", DEFAULT_CONFIG);
+
   assert.equal(result.tier, "NO-GO");
-  assert.equal(result.lane, "Do not prioritize now");
+  assert.match(result.lane, /Reframe/i);
 });
 
-test("classify threshold mapping is correct", () => {
-  assert.equal(classify(75, true).tier, "A");
-  assert.equal(classify(74.9, true).tier, "B");
-  assert.equal(classify(60, true).tier, "B");
-  assert.equal(classify(59.9, true).tier, "C");
+test("classify returns NO-GO when any gate fails", () => {
+  const gateStatus = getGateStatus(
+    { regulatory: "fail", security: "pass", data: "pass", economics: "pass" },
+    DEFAULT_CONFIG
+  );
+  const result = classify(95, gateStatus, "genai_rag", DEFAULT_CONFIG);
+
+  assert.equal(result.tier, "NO-GO");
+});
+
+test("classify caps tier when conditional gates exist", () => {
+  const gateStatus = getGateStatus(
+    { regulatory: "conditional", security: "pass", data: "pass", economics: "pass" },
+    DEFAULT_CONFIG
+  );
+  const result = classify(95, gateStatus, "genai_rag", DEFAULT_CONFIG);
+
+  assert.equal(result.tier, "B");
+});
+
+test("classify threshold mapping still supports A/B/C", () => {
+  const gateStatus = getGateStatus(
+    { regulatory: "pass", security: "pass", data: "pass", economics: "pass" },
+    DEFAULT_CONFIG
+  );
+  assert.equal(classify(75, gateStatus, "genai_rag", DEFAULT_CONFIG).tier, "A");
+  assert.equal(classify(60, gateStatus, "genai_rag", DEFAULT_CONFIG).tier, "B");
+  assert.equal(classify(59.9, gateStatus, "genai_rag", DEFAULT_CONFIG).tier, "C");
 });
 
 test("useCaseHint returns specific and fallback guidance", () => {

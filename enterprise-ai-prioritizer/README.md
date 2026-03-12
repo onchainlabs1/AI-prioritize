@@ -1,39 +1,35 @@
-# Enterprise AI Prioritizer (MVP)
+# Enterprise AI Prioritizer
 
-Local tool to support decision-making and prioritization of enterprise AI projects.
+Application module for the **AI Architect Decision Workbench**.
 
-## What it delivers
-- Mandatory gates (regulatory, security, data, economics).
-- Weighted scoring (0-100) across value, readiness, and risk criteria.
-- Classification into `Tier A`, `Tier B`, `Tier C`, and `NO-GO`.
-- Copy-ready report for architecture/governance review boards.
+For full portfolio documentation, methodology, and architecture details, see:
+- [`../README.md`](../README.md)
 
-## How to run
-In the terminal:
+## Pages
+1. `index.html` - main prioritization workflow
+2. `config.html` - model configuration console
 
+## Functional highlights
+1. Stage 0 fit filtering (`Does this need AI?`)
+2. Tri-state governance gates (`Pass / Conditional / Fail`)
+3. Weighted scoring with editable weights
+4. Evidence-aware contribution multipliers
+5. Tiering output (`A`, `B`, `C`, `NO-GO`)
+6. Transparent report generation
+
+## Local run
 ```bash
 cd "/Users/fabio/Documents/ai-architect-decision-workbench/enterprise-ai-prioritizer"
-python3 -m http.server 8787
+python3 -m http.server 8787 --bind 127.0.0.1
 ```
 
-Open in the browser:
-- `http://localhost:8787`
+Open:
+- `http://127.0.0.1:8787`
+- `http://127.0.0.1:8787/config.html`
 
-## Run unit tests
+## Tests
 From project root:
-
 ```bash
 cd "/Users/fabio/Documents/ai-architect-decision-workbench"
 npm test
 ```
-
-## Best-practice baseline (Mar/2026)
-- EU AI Act timeline (European Commission)
-- NIST AI RMF + Generative AI Profile
-- OWASP LLM Top 10 v1.1
-- ISO/IEC 42001
-- FinOps for AI
-
-## Notes
-- This version is a local MVP (frontend only).
-- Suggested next iteration: database persistence + portfolio dashboard + ADR PDF export.

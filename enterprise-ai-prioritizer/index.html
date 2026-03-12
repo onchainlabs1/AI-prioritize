@@ -18,24 +18,27 @@
       <div class="hero-glow two"></div>
       <div class="hero">
         <p class="eyebrow">Enterprise AI Portfolio Intelligence</p>
-        <h1>Prioritize AI with board-level rigor and execution speed</h1>
+        <h1>Prioritize AI initiatives with transparent, defensible logic</h1>
         <p>
-          Decision workspace to select AI initiatives using compliance gates,
-          unit economics, and portfolio scoring.
+          Decision-support system for AI portfolio governance with Stage 0 fit
+          check, tri-state gates, weighted scoring, and confidence-aware output.
         </p>
         <div class="hero-stats">
           <article>
-            <strong>4</strong>
-            <span>Mandatory gates</span>
+            <strong>Stage 0</strong>
+            <span>Does this need AI?</span>
           </article>
           <article>
-            <strong>7</strong>
-            <span>Weighted criteria</span>
+            <strong>3-state gates</strong>
+            <span>Pass / Conditional / Fail</span>
           </article>
           <article>
-            <strong>90d</strong>
-            <span>Prioritization cycle</span>
+            <strong>Configurable</strong>
+            <span>Weights, thresholds, penalties</span>
           </article>
+        </div>
+        <div class="hero-actions">
+          <a class="hero-link" href="./config.html">Open Configuration</a>
         </div>
       </div>
     </header>
@@ -80,36 +83,91 @@
 
         <article class="panel" style="--delay: 60ms">
           <div class="panel-head">
-            <h2>02. Mandatory Gates</h2>
-            <span class="tag critical">Pass/Fail</span>
+            <h2>02. Stage 0 - Is AI the right approach?</h2>
+            <span class="tag">Fit Filter</span>
           </div>
           <p class="hint">
-            If any gate fails, the recommendation is NO-GO until resolved.
+            This step prevents forcing GenAI where workflow automation, BI, or classical ML may be better.
           </p>
-          <div class="grid one checklist">
-            <label><input id="gateRegulatory" type="checkbox" /> Regulatory risk classification completed (AI Act and local policies).</label>
-            <label><input id="gateSecurity" type="checkbox" /> AI threat model completed (LLM/app/API/data chain).</label>
-            <label><input id="gateData" type="checkbox" /> Data owner, legal basis, and audit trail defined.</label>
-            <label><input id="gateEconomics" type="checkbox" /> Business KPI, baseline, and unit economics defined.</label>
-          </div>
+          <label>
+            Candidate route
+            <select id="stage0Fit">
+              <option value="genai_rag">GenAI / RAG candidate</option>
+              <option value="agentic">Agentic candidate</option>
+              <option value="classical_ml">Classical ML candidate</option>
+              <option value="deterministic">Deterministic automation candidate</option>
+              <option value="not_suitable">Not suitable yet (requires process redesign)</option>
+            </select>
+          </label>
         </article>
 
         <article class="panel" style="--delay: 120ms">
           <div class="panel-head">
-            <h2>03. Weighted Scoring</h2>
-            <span class="tag">1-5</span>
+            <h2>03. Mandatory Gates</h2>
+            <span class="tag critical">Pass / Conditional / Fail</span>
           </div>
           <p class="hint">
-            Suggested scale: 1 = weak, 3 = moderate, 5 = strong.
+            `Fail` blocks the initiative. `Conditional` keeps it alive with penalty and constraints.
           </p>
-          <div id="criteriaContainer" class="criteria"></div>
+          <div class="gates-grid">
+            <label class="gate-row">
+              <span>Regulatory risk classification</span>
+              <select id="gateRegulatory">
+                <option value="pass">Pass</option>
+                <option value="conditional">Conditional</option>
+                <option value="fail">Fail</option>
+              </select>
+            </label>
+            <label class="gate-row">
+              <span>Security threat model</span>
+              <select id="gateSecurity">
+                <option value="pass">Pass</option>
+                <option value="conditional">Conditional</option>
+                <option value="fail">Fail</option>
+              </select>
+            </label>
+            <label class="gate-row">
+              <span>Data governance readiness</span>
+              <select id="gateData">
+                <option value="pass">Pass</option>
+                <option value="conditional">Conditional</option>
+                <option value="fail">Fail</option>
+              </select>
+            </label>
+            <label class="gate-row">
+              <span>KPI baseline + unit economics</span>
+              <select id="gateEconomics">
+                <option value="pass">Pass</option>
+                <option value="conditional">Conditional</option>
+                <option value="fail">Fail</option>
+              </select>
+            </label>
+          </div>
         </article>
 
         <article class="panel" style="--delay: 180ms">
           <div class="panel-head">
-            <h2>04. Executive Decision</h2>
+            <h2>04. Weighted Scoring</h2>
+            <span class="tag">Score + Evidence</span>
+          </div>
+          <p class="hint">
+            Score from 1-5. Evidence quality influences confidence and score contribution.
+          </p>
+          <div class="weight-toolbar">
+            <div id="weightsTotal" class="weight-total">Weight total entered: 100%</div>
+            <button id="normalizeWeightsButton" class="tertiary" type="button">
+              Normalize Weights to 100%
+            </button>
+          </div>
+          <div id="criteriaContainer" class="criteria"></div>
+        </article>
+
+        <article class="panel" style="--delay: 240ms">
+          <div class="panel-head">
+            <h2>05. Executive Decision</h2>
             <span class="tag">Output</span>
           </div>
+          <p id="modelSummary" class="hint"></p>
           <div class="actions">
             <button id="runButton">Calculate Priority</button>
             <button id="copyButton" class="secondary">Copy Report</button>
@@ -129,6 +187,10 @@
               <span>Gates</span>
               <strong id="gateValue">--</strong>
             </div>
+            <div class="metric">
+              <span>Confidence</span>
+              <strong id="confidenceValue">--</strong>
+            </div>
           </div>
           <div class="progress-track" aria-hidden="true">
             <div id="scoreBar" class="progress-bar"></div>
@@ -139,19 +201,20 @@
       </section>
 
       <aside class="side-column">
-        <article class="panel side" style="--delay: 220ms">
+        <article class="panel side" style="--delay: 280ms">
           <div class="panel-head">
-            <h2>Operating Notes</h2>
-            <span class="tag">Portfolio</span>
+            <h2>Selection Logic Used</h2>
+            <span class="tag">Method</span>
           </div>
           <ul class="clean-list">
-            <li>Prioritize Tier A projects with complete gates.</li>
-            <li>Run Tier B in discovery with explicit exit criteria.</li>
-            <li>NO-GO does not enter the quarter until risks are closed.</li>
+            <li><strong>Stage 0:</strong> verify whether AI is the right approach.</li>
+            <li><strong>Stage 1:</strong> evaluate mandatory gates using Pass / Conditional / Fail.</li>
+            <li><strong>Stage 2:</strong> rank with weighted scoring and evidence multipliers.</li>
+            <li><strong>Transparency:</strong> output includes gates, penalties, and full breakdown.</li>
           </ul>
         </article>
 
-        <article class="panel side" style="--delay: 280ms">
+        <article class="panel side" style="--delay: 320ms">
           <div class="panel-head">
             <h2>Best-Practice References (Mar 2026)</h2>
           </div>
