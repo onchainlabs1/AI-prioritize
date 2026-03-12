@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.1 - 2026-03-12
+- Renamed remaining Portuguese-named files to English equivalents.
+- Updated documentation and script references to the new English file names.
+- Confirmed repository-wide English-only content for portfolio consistency.
+
 ## 0.3.0 - 2026-03-12
 - Added Stage 0 fit assessment (`Does this need AI?`) before gate/scoring steps.
 - Replaced binary gates with tri-state governance gates (`Pass`, `Conditional`, `Fail`).

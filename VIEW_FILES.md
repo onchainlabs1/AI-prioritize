@@ -4,9 +4,9 @@
 Use:
 
 ```bash
-./visualizar_arquivos.sh --dir "/Users/fabio/Desktop"
-./visualizar_arquivos.sh --preview "/Users/fabio/Desktop/Enterprise_AI_Blueprint.pdf"
-./visualizar_arquivos.sh --open "/Users/fabio/Desktop/Enterprise_AI_Blueprint.pdf"
+./view_files.sh --dir "/Users/fabio/Desktop"
+./view_files.sh --preview "/Users/fabio/Desktop/Enterprise_AI_Blueprint.pdf"
+./view_files.sh --open "/Users/fabio/Desktop/Enterprise_AI_Blueprint.pdf"
 ```
 
 ## Main files (shortcuts)

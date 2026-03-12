@@ -12,10 +12,10 @@ MAX_LIST=200
 usage() {
   cat <<'EOF'
 Usage:
-  ./visualizar_arquivos.sh
-  ./visualizar_arquivos.sh --dir "/path"
-  ./visualizar_arquivos.sh --preview "/path/file.ext"
-  ./visualizar_arquivos.sh --open "/path/file.ext"
+  ./view_files.sh
+  ./view_files.sh --dir "/path"
+  ./view_files.sh --preview "/path/file.ext"
+  ./view_files.sh --open "/path/file.ext"
 
 Options:
   --dir       List files in a directory (max depth 3).
@@ -24,9 +24,9 @@ Options:
   -h, --help  Show help.
 
 Examples:
-  ./visualizar_arquivos.sh --dir "/Users/fabio/Desktop"
-  ./visualizar_arquivos.sh --preview "/Users/fabio/Desktop/Enterprise_AI_Blueprint.pdf"
-  ./visualizar_arquivos.sh --open "/Users/fabio/Desktop/KOSTAL_Enterprise_AI_Playbook_(2).pdf"
+  ./view_files.sh --dir "/Users/fabio/Desktop"
+  ./view_files.sh --preview "/Users/fabio/Desktop/Enterprise_AI_Blueprint.pdf"
+  ./view_files.sh --open "/Users/fabio/Desktop/KOSTAL_Enterprise_AI_Playbook_(2).pdf"
 EOF
 }
 
@@ -78,14 +78,14 @@ preview_file() {
       fi
       echo
       echo "Tip: to open visually, use:"
-      echo "  ./visualizar_arquivos.sh --open \"$file\""
+      echo "  ./view_files.sh --open \"$file\""
       ;;
     png|jpg|jpeg|gif|webp|heic|svg)
       echo "Image metadata: $file"
       mdls -name kMDItemPixelWidth -name kMDItemPixelHeight -name kMDItemFSSize "$file" 2>/dev/null || true
       echo
       echo "Tip: to open visually, use:"
-      echo "  ./visualizar_arquivos.sh --open \"$file\""
+      echo "  ./view_files.sh --open \"$file\""
       ;;
     *)
       echo "Non-text type. Showing basic metadata: $file"

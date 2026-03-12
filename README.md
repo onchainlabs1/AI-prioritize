@@ -4,7 +4,7 @@ Decision-support system for AI portfolio governance in enterprise environments.
 
 This portfolio project demonstrates how to prioritize AI initiatives with a transparent, auditable, and configurable methodology instead of ad-hoc judgment.
 
-Current version: `0.3.0`
+Current version: `0.3.1`
 
 ## Project objective
 Enable architecture and governance teams to answer:
@@ -130,7 +130,7 @@ Formulas:
 ├── VERSION
 ├── package.json
 ├── run_enterprise_ai_prioritizer.sh
-└── visualizar_arquivos.sh
+└── view_files.sh
 ```
 
 ## Run locally
