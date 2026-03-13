@@ -679,6 +679,39 @@ button.tertiary {
   overflow: auto;
 }
 
+.policy-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.policy-card {
+  border: 1px solid #dfe7f1;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  padding: 0.9rem;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.policy-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.policy-card-head h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.policy-gates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
 .workflow-rail {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -799,6 +832,8 @@ button.tertiary {
   .grid.two,
   .grid.three,
   .grid.five,
+  .policy-grid,
+  .policy-gates,
   .criterion,
   .criterion.config-criterion,
   .decision-strip,

@@ -49,8 +49,9 @@
           <ul class="clean-list">
             <li>collect initiatives with structured business context;</li>
             <li>filter ideas that should not use AI (Stage 0);</li>
+            <li>apply route and region policy before prioritization;</li>
             <li>enforce governance gates before scoring;</li>
-            <li>prioritize with configurable weighted criteria;</li>
+            <li>prioritize with weighted criteria and evidence quality;</li>
             <li>record board decisions with audit trail.</li>
           </ul>
         </article>
@@ -97,17 +98,56 @@
           <div class="grid three">
             <div class="mini-card">
               <strong>Stage 0</strong>
-              <p>Does this initiative really need AI, or should it be automation/analytics first?</p>
+              <p>Route the initiative as GenAI/RAG, agentic, classical ML, deterministic, or not suitable.</p>
             </div>
             <div class="mini-card">
-              <strong>Gates</strong>
-              <p>Fail blocks progress. Conditional applies penalty and policy tier limits.</p>
+              <strong>Policy</strong>
+              <p>Stage 0 route and regulatory region apply minimum gate states, threshold deltas, and tier caps.</p>
             </div>
             <div class="mini-card">
               <strong>Scoring</strong>
-              <p>Weighted criteria + evidence confidence produce final lane recommendation.</p>
+              <p>Weighted criteria plus evidence multipliers produce a decision score and a confidence index.</p>
             </div>
           </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Current Policy Layers</h2>
+            <span class="tag">Model</span>
+          </div>
+          <div class="grid two">
+            <div class="mini-card">
+              <strong>Stage 0 route policy</strong>
+              <p>`agentic` is stricter than `genai_rag`, and `not suitable` becomes immediate `NO-GO`.</p>
+            </div>
+            <div class="mini-card">
+              <strong>Region policy</strong>
+              <p>`EU`, `US`, `EU + US`, and `Global` each apply different minimum gate expectations and thresholds.</p>
+            </div>
+            <div class="mini-card">
+              <strong>Gate behavior</strong>
+              <p>`Fail` blocks immediately. `Conditional` can reduce the score and cap the maximum tier.</p>
+            </div>
+            <div class="mini-card">
+              <strong>Evidence behavior</strong>
+              <p>Weak evidence reduces criterion contribution and also lowers the reported confidence index.</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>How To Read Results</h2>
+            <span class="tag">Interpretation</span>
+          </div>
+          <ul class="clean-list">
+            <li>`Tier A`: prioritize now, assuming policy and gates allow it.</li>
+            <li>`Tier B`: plan next, usually with more discovery or controls.</li>
+            <li>`Tier C`: incubate or rework before portfolio commitment.</li>
+            <li>`NO-GO`: blocked by Stage 0, failed gates, or unmet policy baseline.</li>
+            <li>When blocked, the tool shows a diagnostic score for context, not as an approval signal.</li>
+          </ul>
         </article>
       </section>
 
@@ -119,8 +159,9 @@
           </div>
           <ul class="clean-list">
             <li>Priority lane (`Tier A`, `Tier B`, `Tier C`, `NO-GO`)</li>
+            <li>Decision score or blocked diagnostic score</li>
             <li>Explainable score breakdown</li>
-            <li>Gate status and rationale</li>
+            <li>Gate, policy, and rationale summary</li>
             <li>Board decision history</li>
             <li>Audit trail per initiative</li>
           </ul>

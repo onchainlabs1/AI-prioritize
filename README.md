@@ -2,9 +2,9 @@
 
 Decision-support system for AI portfolio governance in enterprise environments.
 
-This portfolio project demonstrates how to prioritize AI initiatives with a transparent, auditable, and configurable methodology instead of ad-hoc judgment.
+This portfolio project demonstrates how to prioritize AI initiatives with a transparent, auditable, and policy-aware methodology instead of ad-hoc judgment.
 
-Current version: `0.3.3`
+Current version: `0.3.4`
 
 ## Project objective
 Enable architecture and governance teams to answer:
@@ -20,39 +20,46 @@ Enable architecture and governance teams to answer:
 - `Deterministic automation candidate`
 - `Not suitable yet (process redesign needed)`
 
-2. **Stage 1 mandatory tri-state gates**
+2. **Stage 0 route and region policy**
+- built-in policy profiles for `GenAI/RAG`, `Agentic`, `Classical ML`, `Deterministic`, and `Not suitable`
+- region-aware policy profiles for `EU`, `US`, `EU + US`, and `Global`
+- policy can enforce minimum gate states, threshold deltas, and tier caps before final prioritization
+
+3. **Stage 1 mandatory tri-state gates**
 - each gate is `Pass`, `Conditional`, or `Fail`
 - `Fail` blocks prioritization (`NO-GO`)
 - `Conditional` applies policy penalty and tier cap
 
-3. **Stage 2 weighted scoring**
+4. **Stage 2 weighted scoring**
 - criteria scored from `1` to `5`
 - user-editable criterion weights
 - automatic normalization to `100%` when entered total differs
 
-4. **Evidence-aware scoring**
+5. **Evidence-aware scoring**
 - each criterion includes evidence level:
   - `assumed` (low confidence)
   - `partial` (medium confidence)
   - `validated` (high confidence)
 - evidence multipliers adjust score contribution
-- confidence index is reported for decision quality context
+- confidence index is derived from the same evidence multipliers used in scoring
 
-5. **Config page for future tuning**
+6. **Config page for current tuning**
 - editable default weights
 - tier thresholds (`A` / `B`)
 - conditional gate penalty
 - max tier when any conditional gate exists
 - evidence multipliers
+- editable Stage 0 route policy profiles
+- editable region policy profiles
 - persisted locally via browser storage
 
-6. **Transparent decision report**
-- raw score, gate penalty, final score
+7. **Transparent decision report**
+- raw score, gate penalty, decision score, and blocked diagnostic score when applicable
 - tier and lane
-- gate outcomes and pending conditions
+- gate outcomes, policy outcomes, and rationale
 - criterion-level breakdown (score, evidence, multiplier, contribution)
 
-7. **Initiative intake and workflow**
+8. **Initiative intake and workflow**
 - structured idea submission form
 - triage queue with filters (status, BU, lane, owner)
 - assessment page linked by initiative ID (`?id=...`)
@@ -70,7 +77,7 @@ Enable architecture and governance teams to answer:
   - `in_delivery`
   - `closed`
 
-8. **Auditability and snapshots**
+9. **Auditability and snapshots**
 - audit trail entries for key actions:
   - initiative creation
   - status changes
@@ -83,27 +90,30 @@ Enable architecture and governance teams to answer:
   - weights and evidence used
   - config snapshot at decision time
 
-9. **SQLite-backed initiative persistence**
+10. **SQLite-backed initiative persistence**
 - initiatives are stored in `enterprise-ai-prioritizer/data/initiatives.db`
 - backend API is served by `enterprise-ai-prioritizer/server.py`
 - workflow updates and board decisions are persisted outside browser memory
 
-10. **Unit-tested decision engine**
+11. **Unit-tested decision engine**
 - deterministic tests for:
   - score clamping
   - weight normalization
   - gate tri-state behavior
   - tier mapping and caps
   - stage 0 blocking rules
+  - route and region policy behavior
+  - blocked diagnostic score semantics
+  - evidence confidence derivation
 
-11. **Software engineering hardening**
+12. **Software engineering hardening**
 - intake payload validation and sanitization
 - explicit workflow state machine with transition guardrails
 - safer DOM rendering for user-entered data in queue/board pages
 - bounded audit history retention
 - immutable identity fields on initiative updates
 
-12. **Modern enterprise UI pass**
+13. **Modern enterprise UI pass**
 - simplified home as portfolio command center
 - dedicated assessment workspace page for daily scoring decisions
 - cleaner, Linear-inspired component styling and simplified navigation labels
@@ -113,6 +123,11 @@ Enable architecture and governance teams to answer:
 ### Stage 0: Is AI the right approach?
 If initiative is marked `not suitable`, output is immediate `NO-GO` with lane:
 - `Reframe / process redesign`
+
+Other Stage 0 routes are not cosmetic labels. They feed policy:
+- route-specific threshold deltas
+- route-specific maximum tier caps
+- route-specific minimum gate expectations
 
 ### Stage 1: Mandatory gates
 Gates:
@@ -126,6 +141,13 @@ Gate behavior:
 - `Conditional`: project can continue but receives:
   - score penalty (`conditionalPenalty * count`)
   - tier cap (`maxTierIfConditional`, default `B`)
+
+### Region policy
+Region also affects prioritization before lane assignment:
+- `EU`, `US`, `EU + US`, and `Global` have different baseline expectations
+- policy may require specific gates to be at least `Conditional` or `Pass`
+- policy may tighten thresholds or cap the maximum tier
+- if route/region policy baseline is not met, the result is `NO-GO`
 
 ### Stage 2: Weighted scoring model
 Default criteria and baseline weights:
@@ -142,16 +164,19 @@ Formulas:
 1. `effective_weight_i = entered_weight_i / sum(entered_weights) * 100`
 2. `criterion_contribution_i = (score_i / 5) * effective_weight_i * evidence_multiplier_i`
 3. `raw_score = sum(criterion_contribution_i)`
-4. `final_score = max(0, raw_score - conditional_penalty_total)`
+4. `diagnostic_score = max(0, raw_score - conditional_penalty_total)`
+5. `confidence_index = weighted evidence multiplier ratio across all criteria`
 
 ### Lane mapping
 1. `NO-GO` if Stage 0 is not suitable
 2. `NO-GO` if any gate is `Fail`
-3. Otherwise, based on `final_score`:
-- `Tier A`: `>= tierA threshold` (default `75`)
-- `Tier B`: `>= tierB threshold` and `< tierA` (default `60-74.9`)
+3. `NO-GO` if route or region policy minimum baseline is not met
+4. Otherwise, based on the policy-adjusted score thresholds:
+- `Tier A`: `>= effective tierA threshold`
+- `Tier B`: `>= effective tierB threshold` and `< tierA`
 - `Tier C`: `< tierB`
-4. If any gate is `Conditional`, tier is capped by policy (default cap: `B`)
+5. If any gate is `Conditional`, tier is capped by policy (default cap: `B`)
+6. If the initiative is blocked, the tool shows `diagnostic_score` for context but not as an approval signal
 
 ## UI pages
 1. `index.html` (home dashboard)
@@ -170,7 +195,7 @@ Formulas:
 - lane/score review + decision + rationale
 
 6. `config.html` (configuration console)
-- defaults and model behavior tuning
+- defaults for weights, thresholds, conditional-gate behavior, evidence multipliers, and route/region policy profiles
 
 7. `how-it-works.html` (method page)
 - workflow explanation and governance decision flow
@@ -243,6 +268,7 @@ Open:
 - `http://127.0.0.1:8787/assessment.html` (assessment)
 - `http://127.0.0.1:8787/board.html` (board)
 - `http://127.0.0.1:8787/config.html` (config)
+- `http://127.0.0.1:8787/how-it-works.html` (method)
 
 Alternative:
 ```bash
@@ -283,4 +309,5 @@ This project showcases:
 2. explainable prioritization logic,
 3. governance-aware product design,
 4. configurable policy-driven behavior,
+   with route and region policy configurable in the Admin UI,
 5. testing discipline for decision engines.

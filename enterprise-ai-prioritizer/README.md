@@ -8,13 +8,13 @@ For portfolio-level context and methodology details, see [../README.md](../READM
 This module provides an enterprise-style decision workflow:
 1. Intake idea submission.
 2. Triage filtering and routing.
-3. Stage 0 + gates + weighted assessment.
+3. Stage 0 + route/region policy + gates + weighted assessment.
 4. Board decision registration.
 5. Audit-ready persistence in SQLite.
 
 ## Architecture
 Core files:
-1. `decision-engine.js`: deterministic prioritization logic (Stage 0, gates, scoring, lane mapping).
+1. `decision-engine.js`: deterministic prioritization logic (Stage 0, route/region policy, gates, scoring, lane mapping).
 2. `initiative-store.js`: frontend API client + payload normalization/validation helpers.
 3. `settings.js`: model configuration persistence.
 4. `server.py`: HTTP API + SQLite database (`data/initiatives.db`) + static serving.
@@ -26,8 +26,24 @@ UI pages:
 3. `triage.html`: queue and filters.
 4. `assessment.html`: initiative assessment.
 5. `board.html`: board decisions.
-6. `config.html`: policy and weights configuration.
+6. `config.html`: weights, thresholds, gate behavior, evidence, and policy configuration.
 7. `how-it-works.html`: product overview and visual workflow.
+
+## Current decision behavior
+1. Stage 0 route is prescriptive:
+- `not_suitable` is immediate `NO-GO`
+- other routes can apply tier caps, threshold deltas, and minimum gate expectations
+
+2. Region is prescriptive:
+- `EU`, `US`, `EU + US`, and `Global` each apply a built-in policy profile
+- unmet route/region policy baseline results in `NO-GO`
+
+3. Scores have two meanings:
+- `decision score` is used only when the initiative is not blocked
+- `diagnostic score` is shown when blocked, strictly as context
+
+4. Confidence is derived from evidence multipliers:
+- evidence quality lowers both contribution and reported confidence
 
 ## Engineering Best Practices Implemented
 1. **Input quality controls**

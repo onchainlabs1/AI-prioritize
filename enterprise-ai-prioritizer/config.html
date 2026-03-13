@@ -18,7 +18,7 @@
         <p class="eyebrow">Configuration Console</p>
         <h1>Prioritization model settings</h1>
         <p>
-          Adjust default scoring weights and governance behavior. Settings are stored locally and used by the main prioritization page.
+          Adjust default scoring weights, governance behavior, and policy profiles. Settings are stored locally and used by the assessment page.
         </p>
         <nav class="top-nav">
           <a href="./index.html">Home</a>
@@ -87,7 +87,7 @@
             <h2>04. Evidence Multipliers</h2>
             <span class="tag">Config</span>
           </div>
-          <p class="hint">Lower multipliers reduce score contribution when evidence quality is weak.</p>
+          <p class="hint">Lower multipliers reduce score contribution when evidence quality is weak and also reduce the confidence index.</p>
           <div class="grid three">
             <label>
               Assumed (low confidence)
@@ -106,7 +106,25 @@
 
         <article class="panel">
           <div class="panel-head">
-            <h2>05. Actions</h2>
+            <h2>05. Stage 0 Route Policy</h2>
+            <span class="tag">Config</span>
+          </div>
+          <p class="hint">Control threshold deltas, max tier, and minimum gate states for each route.</p>
+          <div id="stage0PolicyContainer" class="policy-grid"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>06. Region Policy</h2>
+            <span class="tag">Config</span>
+          </div>
+          <p class="hint">Apply region-specific baseline rules before final prioritization.</p>
+          <div id="regionPolicyContainer" class="policy-grid"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>07. Actions</h2>
           </div>
           <div class="actions">
             <button id="saveConfigButton">Save Configuration</button>

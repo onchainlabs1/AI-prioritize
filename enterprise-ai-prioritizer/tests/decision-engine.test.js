@@ -45,6 +45,40 @@ test("mergeWithDefaultConfig enforces threshold consistency", () => {
   assert.equal(merged.thresholds.tierB, 70);
 });
 
+test("mergeWithDefaultConfig accepts stage and region policy overrides", () => {
+  const merged = mergeWithDefaultConfig({
+    stage0Policies: {
+      agentic: {
+        thresholdDelta: 9,
+        maxTier: "C",
+        minGateStates: {
+          security: "pass",
+          economics: "conditional",
+        },
+      },
+    },
+    regionPolicies: {
+      eu: {
+        thresholdDelta: 5,
+        maxTier: "B",
+        minGateStates: {
+          regulatory: "pass",
+          data: "conditional",
+        },
+      },
+    },
+  });
+
+  assert.equal(merged.stage0Policies.agentic.thresholdDelta, 9);
+  assert.equal(merged.stage0Policies.agentic.maxTier, "C");
+  assert.equal(merged.stage0Policies.agentic.minGateStates.security, "pass");
+  assert.equal(merged.stage0Policies.agentic.minGateStates.economics, "conditional");
+  assert.equal(merged.regionPolicies.eu.thresholdDelta, 5);
+  assert.equal(merged.regionPolicies.eu.maxTier, "B");
+  assert.equal(merged.regionPolicies.eu.minGateStates.regulatory, "pass");
+  assert.equal(merged.regionPolicies.eu.minGateStates.data, "conditional");
+});
+
 test("getGateStatus supports pass/conditional/fail", () => {
   const result = getGateStatus(
     {
@@ -117,6 +151,9 @@ test("classify returns NO-GO when any gate fails", () => {
   const result = classify(95, gateStatus, "genai_rag", DEFAULT_CONFIG);
 
   assert.equal(result.tier, "NO-GO");
+  assert.equal(result.adjustedScore, null);
+  assert.equal(result.blocked, true);
+  assert.equal(result.diagnosticScore, 95);
 });
 
 test("classify caps tier when conditional gates exist", () => {
@@ -137,6 +174,57 @@ test("classify threshold mapping still supports A/B/C", () => {
   assert.equal(classify(75, gateStatus, "genai_rag", DEFAULT_CONFIG).tier, "A");
   assert.equal(classify(60, gateStatus, "genai_rag", DEFAULT_CONFIG).tier, "B");
   assert.equal(classify(59.9, gateStatus, "genai_rag", DEFAULT_CONFIG).tier, "C");
+});
+
+test("classify applies stage-specific caps for agentic route", () => {
+  const gateStatus = getGateStatus(
+    { regulatory: "pass", security: "pass", data: "pass", economics: "pass" },
+    DEFAULT_CONFIG
+  );
+  const result = classify(99, gateStatus, "agentic", DEFAULT_CONFIG, { region: "us" });
+
+  assert.equal(result.tier, "B");
+  assert.equal(result.blocked, false);
+});
+
+test("classify enforces regional gate policy requirements", () => {
+  const gateStatus = getGateStatus(
+    { regulatory: "conditional", security: "pass", data: "pass", economics: "pass" },
+    DEFAULT_CONFIG
+  );
+  const result = classify(95, gateStatus, "genai_rag", DEFAULT_CONFIG, { region: "eu" });
+
+  assert.equal(result.tier, "NO-GO");
+  assert.equal(result.blocked, true);
+  assert.equal(result.adjustedScore, null);
+  assert.equal(result.diagnosticScore, 87);
+});
+
+test("classify applies region threshold deltas", () => {
+  const gateStatus = getGateStatus(
+    { regulatory: "pass", security: "pass", data: "pass", economics: "pass" },
+    DEFAULT_CONFIG
+  );
+  const baseline = classify(78, gateStatus, "genai_rag", DEFAULT_CONFIG, { region: "us" });
+  const euUs = classify(78, gateStatus, "genai_rag", DEFAULT_CONFIG, { region: "eu-us" });
+
+  assert.equal(baseline.tier, "A");
+  assert.equal(euUs.tier, "B");
+});
+
+test("getScores derives confidence from evidence multipliers", () => {
+  const scoreInput = Object.fromEntries(CRITERIA.map((c) => [c.key, 5]));
+  const evidenceInput = Object.fromEntries(CRITERIA.map((c) => [c.key, "assumed"]));
+  const config = mergeWithDefaultConfig({
+    evidenceMultipliers: {
+      assumed: 1.0,
+      partial: 1.5,
+      validated: 2.0,
+    },
+  });
+  const result = getScores(scoreInput, CRITERIA, evidenceInput, config);
+
+  assert.equal(result.confidenceIndex, 50);
 });
 
 test("useCaseHint returns specific and fallback guidance", () => {

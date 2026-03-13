@@ -190,7 +190,8 @@ function updateModelSummary(config) {
   el.modelSummary.textContent =
     `Thresholds: Tier A >= ${config.thresholds.tierA}, Tier B >= ${config.thresholds.tierB}. ` +
     `Conditional gate penalty: ${config.gates.conditionalPenalty} each. ` +
-    `Max tier with conditional gates: ${config.gates.maxTierIfConditional}.`;
+    `Max tier with conditional gates: ${config.gates.maxTierIfConditional}. ` +
+    "Stage 0 route and region policy may further tighten thresholds, require specific gate states, or block prioritization.";
 }
 
 function buildReport() {
@@ -205,7 +206,7 @@ function buildReport() {
   const gate = getGateStatus(config);
   const scoreResult = getScores(config, activeCriteria);
   const scores = scoreResult.evaluation;
-  const cls = classify(scores.total, gate, stage0Choice, config);
+  const cls = classify(scores.total, gate, stage0Choice, config, { region });
 
   const lines = [];
   lines.push(`Project: ${name}`);
@@ -216,7 +217,12 @@ function buildReport() {
   lines.push("");
   lines.push(`Raw weighted score: ${scores.total}/100`);
   lines.push(`Gate penalty: ${gate.penalty}`);
-  lines.push(`Final decision score: ${cls.adjustedScore}/100`);
+  if (cls.blocked) {
+    lines.push("Final decision: BLOCKED (NO-GO)");
+    lines.push(`Diagnostic score (non-decisive): ${cls.diagnosticScore}/100`);
+  } else {
+    lines.push(`Final decision score: ${cls.adjustedScore}/100`);
+  }
   lines.push(`Tier: ${cls.tier} | Lane: ${cls.lane}`);
   lines.push(`Rationale: ${cls.rationale}`);
   lines.push("");
@@ -258,6 +264,8 @@ function buildReport() {
     text: lines.join("\n"),
     rawScore: scores.total,
     score: cls.adjustedScore,
+    diagnosticScore: cls.diagnosticScore,
+    blocked: cls.blocked,
     confidenceIndex: scores.confidenceIndex,
     stage0Choice,
     project: {
@@ -285,11 +293,16 @@ function renderResult(report) {
         ? `Gates: ${report.gate.conditionalCount} conditional`
         : "Gates: all pass";
 
-  if (el.scoreValue) el.scoreValue.textContent = `${report.score}/100`;
+  if (el.scoreValue) {
+    el.scoreValue.textContent = report.classification.blocked ? "Blocked" : `${report.score}/100`;
+  }
   if (el.laneValue) el.laneValue.textContent = report.classification.lane;
   if (el.gateValue) el.gateValue.textContent = gateSummary.replace("Gates: ", "");
   if (el.confidenceValue) el.confidenceValue.textContent = `${report.confidenceIndex}/100`;
-  if (el.scoreBar) el.scoreBar.style.width = `${Math.max(0, Math.min(100, report.score))}%`;
+  if (el.scoreBar) {
+    const progress = report.classification.blocked ? 0 : Math.max(0, Math.min(100, Number(report.score) || 0));
+    el.scoreBar.style.width = `${progress}%`;
+  }
 
   el.result.classList.remove("empty");
   el.result.innerHTML =

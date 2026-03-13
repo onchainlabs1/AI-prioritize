@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.4 - 2026-03-13
+- Added editable Stage 0 route policies to the Admin UI, including threshold delta, max tier, and minimum gate states.
+- Added editable region policies to the Admin UI for `EU`, `US`, `EU + US`, and `Global`.
+- Aligned assessment output with blocked-vs-diagnostic score semantics and route/region-aware policy messaging.
+- Updated `how-it-works.html`, root README, module README, and Admin copy to match the live decision engine.
+- Expanded decision-engine tests to cover policy override merging and the latest route/region scoring behavior.
+
 ## 0.3.3 - 2026-03-12
 - Applied a cleaner, modernized UI pass with a Linear-inspired visual direction.
 - Simplified top navigation labels across pages (`Assessment`, `Admin`, `Method`).

@@ -57,6 +57,7 @@ export const GATES = [
 ];
 
 export const EVIDENCE_LEVELS = ["assumed", "partial", "validated"];
+const GATE_STATE_RANK = { fail: 0, conditional: 1, pass: 2 };
 
 export const DEFAULT_CONFIG = {
   weights: Object.fromEntries(CRITERIA.map((c) => [c.key, c.weight])),
@@ -72,6 +73,76 @@ export const DEFAULT_CONFIG = {
     assumed: 0.8,
     partial: 0.9,
     validated: 1.0,
+  },
+  stage0Policies: {
+    genai_rag: {
+      thresholdDelta: 0,
+      maxTier: "A",
+      minGateStates: {
+        security: "conditional",
+        data: "conditional",
+      },
+    },
+    agentic: {
+      thresholdDelta: 7,
+      maxTier: "B",
+      minGateStates: {
+        regulatory: "pass",
+        security: "pass",
+        data: "pass",
+        economics: "conditional",
+      },
+    },
+    classical_ml: {
+      thresholdDelta: 3,
+      maxTier: "A",
+      minGateStates: {
+        regulatory: "conditional",
+        data: "pass",
+      },
+    },
+    deterministic: {
+      thresholdDelta: -2,
+      maxTier: "A",
+      minGateStates: {
+        security: "conditional",
+        economics: "conditional",
+      },
+    },
+  },
+  regionPolicies: {
+    "eu-us": {
+      thresholdDelta: 4,
+      maxTier: "A",
+      minGateStates: {
+        regulatory: "pass",
+        security: "pass",
+      },
+    },
+    eu: {
+      thresholdDelta: 3,
+      maxTier: "A",
+      minGateStates: {
+        regulatory: "pass",
+        data: "conditional",
+      },
+    },
+    us: {
+      thresholdDelta: 1,
+      maxTier: "A",
+      minGateStates: {
+        security: "pass",
+      },
+    },
+    global: {
+      thresholdDelta: 6,
+      maxTier: "B",
+      minGateStates: {
+        regulatory: "pass",
+        security: "pass",
+        data: "pass",
+      },
+    },
   },
 };
 
@@ -117,12 +188,51 @@ function sanitizeTier(raw, fallback) {
   return fallback;
 }
 
+function sanitizeOptionalTier(raw, fallback) {
+  if (raw == null) {
+    return null;
+  }
+  return sanitizeTier(raw, fallback);
+}
+
 function sanitizeMultiplier(raw, fallback) {
   const parsed = Number(raw);
   if (!Number.isFinite(parsed) || parsed <= 0) {
     return fallback;
   }
   return parsed;
+}
+
+function sanitizeThresholdDelta(raw, fallback) {
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed)) {
+    return fallback;
+  }
+  return Math.min(30, Math.max(-30, parsed));
+}
+
+function sanitizePolicy(policyInput, fallbackPolicy) {
+  const fallback = fallbackPolicy || { thresholdDelta: 0, maxTier: null, minGateStates: {} };
+  const source = policyInput && typeof policyInput === "object" ? policyInput : {};
+  const minGateStates = {};
+
+  GATES.forEach((gate) => {
+    const fallbackState = fallback.minGateStates?.[gate.key];
+    const rawState = source.minGateStates?.[gate.key];
+    const chosen =
+      rawState === "pass" || rawState === "conditional" || rawState === "fail"
+        ? rawState
+        : normalizeGateState(fallbackState ?? "fail");
+    if (chosen !== "fail") {
+      minGateStates[gate.key] = chosen;
+    }
+  });
+
+  return {
+    thresholdDelta: sanitizeThresholdDelta(source.thresholdDelta, fallback.thresholdDelta || 0),
+    maxTier: sanitizeOptionalTier(source.maxTier, fallback.maxTier || null),
+    minGateStates,
+  };
 }
 
 export function mergeWithDefaultConfig(input = {}) {
@@ -172,6 +282,38 @@ export function mergeWithDefaultConfig(input = {}) {
     );
   }
 
+  if (input.stage0Policies && typeof input.stage0Policies === "object") {
+    Object.keys(DEFAULT_CONFIG.stage0Policies).forEach((key) => {
+      merged.stage0Policies[key] = sanitizePolicy(
+        input.stage0Policies[key],
+        DEFAULT_CONFIG.stage0Policies[key]
+      );
+    });
+  } else {
+    Object.keys(DEFAULT_CONFIG.stage0Policies).forEach((key) => {
+      merged.stage0Policies[key] = sanitizePolicy(
+        DEFAULT_CONFIG.stage0Policies[key],
+        DEFAULT_CONFIG.stage0Policies[key]
+      );
+    });
+  }
+
+  if (input.regionPolicies && typeof input.regionPolicies === "object") {
+    Object.keys(DEFAULT_CONFIG.regionPolicies).forEach((key) => {
+      merged.regionPolicies[key] = sanitizePolicy(
+        input.regionPolicies[key],
+        DEFAULT_CONFIG.regionPolicies[key]
+      );
+    });
+  } else {
+    Object.keys(DEFAULT_CONFIG.regionPolicies).forEach((key) => {
+      merged.regionPolicies[key] = sanitizePolicy(
+        DEFAULT_CONFIG.regionPolicies[key],
+        DEFAULT_CONFIG.regionPolicies[key]
+      );
+    });
+  }
+
   return merged;
 }
 
@@ -211,6 +353,10 @@ function normalizeGateState(raw) {
     return raw;
   }
   return "fail";
+}
+
+function gateStateRank(state) {
+  return GATE_STATE_RANK[normalizeGateState(state)] ?? 0;
 }
 
 export function getGateStatus(gateInput, config = DEFAULT_CONFIG) {
@@ -285,8 +431,61 @@ function tierMeta(tier) {
   };
 }
 
-export function classify(baseScore, gateStatus, stage0Choice, config = DEFAULT_CONFIG) {
+function resolvePolicy(policyMap, key) {
+  if (key && Object.prototype.hasOwnProperty.call(policyMap, key)) {
+    return policyMap[key];
+  }
+  return { thresholdDelta: 0, maxTier: null, minGateStates: {} };
+}
+
+function mergeRequiredGateStates(...sources) {
+  const merged = {};
+  GATES.forEach((gate) => {
+    let requiredRank = 0;
+    sources.forEach((source) => {
+      const state = source?.[gate.key];
+      if (state) {
+        requiredRank = Math.max(requiredRank, gateStateRank(state));
+      }
+    });
+    if (requiredRank > 0) {
+      merged[gate.key] = requiredRank >= 2 ? "pass" : "conditional";
+    }
+  });
+  return merged;
+}
+
+function evaluatePolicyGateViolations(gateStatus, requiredGateStates) {
+  const byKey = new Map((gateStatus.details || []).map((detail) => [detail.key, detail]));
+  const violations = [];
+  Object.entries(requiredGateStates).forEach(([gateKey, requiredState]) => {
+    const detail = byKey.get(gateKey);
+    const actualState = normalizeGateState(detail?.state);
+    if (gateStateRank(actualState) < gateStateRank(requiredState)) {
+      const gate = GATES.find((item) => item.key === gateKey);
+      violations.push({
+        key: gateKey,
+        label: gate?.label || gateKey,
+        requiredState,
+        actualState,
+      });
+    }
+  });
+  return violations;
+}
+
+function applyThresholdDelta(thresholds, delta) {
+  const tierA = Math.min(100, Math.max(0, thresholds.tierA + delta));
+  const tierB = Math.min(100, Math.max(0, thresholds.tierB + delta));
+  return {
+    tierA,
+    tierB: Math.min(tierA, tierB),
+  };
+}
+
+export function classify(baseScore, gateStatus, stage0Choice, config = DEFAULT_CONFIG, context = {}) {
   const cleanConfig = mergeWithDefaultConfig(config);
+  const diagnosticScore = Math.max(0, Math.round((baseScore - gateStatus.penalty) * 10) / 10);
 
   if (stage0Choice === "not_suitable") {
     return {
@@ -294,7 +493,9 @@ export function classify(baseScore, gateStatus, stage0Choice, config = DEFAULT_C
       lane: "Reframe / process redesign",
       css: "bad",
       rationale: "Stage 0 indicates this initiative is not suitable for AI in its current form.",
-      adjustedScore: 0,
+      adjustedScore: null,
+      diagnosticScore,
+      blocked: true,
     };
   }
 
@@ -304,41 +505,90 @@ export function classify(baseScore, gateStatus, stage0Choice, config = DEFAULT_C
       lane: "Do not prioritize now",
       css: "bad",
       rationale: "One or more mandatory gates failed.",
-      adjustedScore: Math.max(0, Math.round((baseScore - gateStatus.penalty) * 10) / 10),
+      adjustedScore: null,
+      diagnosticScore,
+      blocked: true,
     };
   }
 
-  const adjustedScore = Math.max(0, Math.round((baseScore - gateStatus.penalty) * 10) / 10);
-  let tier = tierFromScore(adjustedScore, cleanConfig.thresholds);
+  const stagePolicy = resolvePolicy(cleanConfig.stage0Policies, stage0Choice);
+  const regionPolicy = resolvePolicy(cleanConfig.regionPolicies, context?.region);
+  const requiredGateStates = mergeRequiredGateStates(
+    stagePolicy.minGateStates,
+    regionPolicy.minGateStates
+  );
+  const policyViolations = evaluatePolicyGateViolations(gateStatus, requiredGateStates);
+  if (policyViolations.length > 0) {
+    const labels = policyViolations.map((item) => item.label).join(", ");
+    return {
+      tier: "NO-GO",
+      lane: "Do not prioritize now",
+      css: "bad",
+      rationale: `Policy baseline was not met for: ${labels}.`,
+      adjustedScore: null,
+      diagnosticScore,
+      blocked: true,
+    };
+  }
+
+  const delta = stagePolicy.thresholdDelta + regionPolicy.thresholdDelta;
+  const effectiveThresholds = applyThresholdDelta(cleanConfig.thresholds, delta);
+  let tier = tierFromScore(diagnosticScore, effectiveThresholds);
+  let conditionalCapApplied = false;
+  let stageCapApplied = false;
+  let regionCapApplied = false;
 
   if (gateStatus.conditionalCount > 0) {
-    tier = capTier(tier, cleanConfig.gates.maxTierIfConditional);
+    const capped = capTier(tier, cleanConfig.gates.maxTierIfConditional);
+    conditionalCapApplied = capped !== tier;
+    tier = capped;
+  }
+  {
+    const capped = capTier(tier, stagePolicy.maxTier);
+    stageCapApplied = capped !== tier;
+    tier = capped;
+  }
+  {
+    const capped = capTier(tier, regionPolicy.maxTier);
+    regionCapApplied = capped !== tier;
+    tier = capped;
   }
 
   const meta = tierMeta(tier);
-  const rationaleSuffix =
-    gateStatus.conditionalCount > 0
-      ? ` Conditional gates impose a penalty of ${gateStatus.penalty} points.`
-      : "";
+  const rationaleParts = [];
+  if (conditionalCapApplied) {
+    rationaleParts.push(`Conditional gates impose a penalty of ${gateStatus.penalty} points.`);
+  }
+  if (delta !== 0) {
+    rationaleParts.push(`Policy threshold delta applied: ${delta > 0 ? "+" : ""}${delta}.`);
+  }
+  if (stageCapApplied && stagePolicy.maxTier) {
+    rationaleParts.push(`Stage 0 cap applied at Tier ${stagePolicy.maxTier}.`);
+  }
+  if (regionCapApplied && regionPolicy.maxTier) {
+    rationaleParts.push(`Region cap applied at Tier ${regionPolicy.maxTier}.`);
+  }
 
   return {
     tier,
     lane: meta.lane,
     css: meta.css,
-    rationale: `Decision based on weighted value, feasibility, and risk scoring.${rationaleSuffix}`,
-    adjustedScore,
+    rationale: `Decision based on weighted value, feasibility, and risk scoring${rationaleParts.length ? ` ${rationaleParts.join(" ")}` : "."}`,
+    adjustedScore: diagnosticScore,
+    diagnosticScore,
+    blocked: false,
   };
 }
 
 export function getScores(scoreInput, criteria = CRITERIA, evidenceInput = {}, config = DEFAULT_CONFIG) {
   const cleanConfig = mergeWithDefaultConfig(config);
   const { normalized, rawTotal } = normalizeCriteriaWeights(criteria);
-
-  const confidenceScale = {
-    assumed: 0.4,
-    partial: 0.7,
-    validated: 1.0,
-  };
+  const maxEvidenceMultiplier = Math.max(
+    cleanConfig.evidenceMultipliers.assumed,
+    cleanConfig.evidenceMultipliers.partial,
+    cleanConfig.evidenceMultipliers.validated,
+    Number.EPSILON
+  );
 
   let weighted = 0;
   let confidenceAccumulator = 0;
@@ -355,7 +605,7 @@ export function getScores(scoreInput, criteria = CRITERIA, evidenceInput = {}, c
     const multiplier = cleanConfig.evidenceMultipliers[evidence];
     const contribution = (score / 5) * criterion.weight * multiplier;
     weighted += contribution;
-    confidenceAccumulator += confidenceScale[evidence] * criterion.weight;
+    confidenceAccumulator += (multiplier / maxEvidenceMultiplier) * criterion.weight;
     evidenceCounts[evidence] += 1;
 
     details.push({
