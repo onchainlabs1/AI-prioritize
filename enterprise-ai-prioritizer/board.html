@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Board View</title>
+    <title>Decision Review</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -16,18 +16,18 @@
     <header class="hero-shell">
       <div class="hero">
         <p class="eyebrow">AI Initiative Prioritization Workbench</p>
-        <h1>Board View</h1>
+        <h1>Decision Review</h1>
         <p>
-          Review scored initiatives, evaluate rationale, and record portfolio decisions.
+          Review assessed initiatives, compare rationale, and record the best next-step decision.
         </p>
         <nav class="top-nav">
           <a href="./index.html">Home</a>
           <a href="./submit.html">Submit</a>
-          <a href="./triage.html">Triage Queue</a>
-          <a href="./board.html" class="active">Board View</a>
+          <a href="./triage.html">Queue</a>
+          <a href="./board.html" class="active">Decisions</a>
           <a href="./assessment.html">Assessment</a>
-          <a href="./config.html">Admin</a>
-          <a href="./how-it-works.html">Method</a>
+          <a href="./config.html">Settings</a>
+          <a href="./how-it-works.html">Approach</a>
         </nav>
       </div>
     </header>
@@ -36,11 +36,11 @@
       <section class="main-column">
         <article class="panel">
           <div class="panel-head">
-            <h2>Board Decision Queue</h2>
+            <h2>Decision Queue</h2>
             <span id="boardCount" class="tag">0</span>
           </div>
           <p class="hint">
-            Default queue focuses on initiatives in `board_review`, `assessment`, and `hold`.
+            This view highlights initiatives that are ready for a decision or a clear follow-up.
           </p>
           <p id="boardStatus" class="hint"></p>
           <div id="boardList" class="queue-list"></div>

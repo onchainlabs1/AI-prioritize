@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Triage Queue</title>
+    <title>Review Queue</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -16,18 +16,18 @@
     <header class="hero-shell">
       <div class="hero">
         <p class="eyebrow">AI Initiative Prioritization Workbench</p>
-        <h1>Triage Queue</h1>
+        <h1>Review Queue</h1>
         <p>
-          Filter and route initiatives for assessment and board review.
+          Sort incoming initiatives, align owners, and move the best opportunities forward.
         </p>
         <nav class="top-nav">
           <a href="./index.html">Home</a>
           <a href="./submit.html">Submit</a>
-          <a href="./triage.html" class="active">Triage Queue</a>
-          <a href="./board.html">Board View</a>
+          <a href="./triage.html" class="active">Queue</a>
+          <a href="./board.html">Decisions</a>
           <a href="./assessment.html">Assessment</a>
-          <a href="./config.html">Admin</a>
-          <a href="./how-it-works.html">Method</a>
+          <a href="./config.html">Settings</a>
+          <a href="./how-it-works.html">Approach</a>
         </nav>
       </div>
     </header>
@@ -36,7 +36,7 @@
       <section class="main-column">
         <article class="panel">
           <div class="panel-head">
-            <h2>Queue Filters</h2>
+            <h2>Review Filters</h2>
             <span class="tag">Queue</span>
           </div>
           <div class="grid five">
@@ -63,8 +63,8 @@
                 <option value="Prioritize now">Tier A</option>
                 <option value="Plan next">Tier B</option>
                 <option value="Incubate / discovery">Tier C</option>
-                <option value="Do not prioritize now">NO-GO</option>
-                <option value="Reframe / process redesign">NO-GO (Reframe)</option>
+                <option value="Do not prioritize now">Not a fit now</option>
+                <option value="Reframe / process redesign">Needs reframing</option>
                 <option value="Unassessed">Unassessed</option>
               </select>
             </label>
@@ -79,7 +79,7 @@
 
         <article class="panel">
           <div class="panel-head">
-            <h2>Initiatives</h2>
+            <h2>Initiatives In Flow</h2>
             <span id="resultCount" class="tag">0</span>
           </div>
           <div id="queueList" class="queue-list"></div>

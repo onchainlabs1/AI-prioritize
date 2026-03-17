@@ -106,7 +106,7 @@ async function renderList() {
     const actions = createElement("div", "actions");
     const assessmentLink = createElement("a", "btn-link", "Open Assessment");
     assessmentLink.href = `./assessment.html?id=${encodeURIComponent(initiative.id)}`;
-    const boardLink = createElement("a", "btn-link", "Open Board View");
+    const boardLink = createElement("a", "btn-link", "Open Decision Review");
     boardLink.href = `./board.html?id=${encodeURIComponent(initiative.id)}`;
 
     header.appendChild(title);

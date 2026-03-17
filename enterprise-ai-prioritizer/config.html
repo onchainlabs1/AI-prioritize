@@ -15,19 +15,19 @@
   <body>
     <header class="hero-shell config-hero">
       <div class="hero">
-        <p class="eyebrow">Configuration Console</p>
+        <p class="eyebrow">Model Settings</p>
         <h1>Prioritization model settings</h1>
         <p>
-          Adjust default scoring weights, governance behavior, and policy profiles. Settings are stored locally and used by the assessment page.
+          Tune scoring defaults, readiness behavior, and route guidance. Settings are stored locally and used by the assessment page.
         </p>
         <nav class="top-nav">
           <a href="./index.html">Home</a>
           <a href="./submit.html">Submit</a>
-          <a href="./triage.html">Triage Queue</a>
-          <a href="./board.html">Board View</a>
+          <a href="./triage.html">Queue</a>
+          <a href="./board.html">Decisions</a>
           <a href="./assessment.html">Assessment</a>
-          <a href="./config.html" class="active">Admin</a>
-          <a href="./how-it-works.html">Method</a>
+          <a href="./config.html" class="active">Settings</a>
+          <a href="./how-it-works.html">Approach</a>
         </nav>
       </div>
     </header>
@@ -63,7 +63,7 @@
 
         <article class="panel">
           <div class="panel-head">
-            <h2>03. Gate Behavior</h2>
+            <h2>03. Readiness Check Behavior</h2>
             <span class="tag critical">Config</span>
           </div>
           <div class="grid two">
@@ -106,19 +106,19 @@
 
         <article class="panel">
           <div class="panel-head">
-            <h2>05. Stage 0 Route Policy</h2>
+            <h2>05. Approach Defaults</h2>
             <span class="tag">Config</span>
           </div>
-          <p class="hint">Control threshold deltas, max tier, and minimum gate states for each route.</p>
+          <p class="hint">Adjust threshold deltas, tier caps, and baseline checks for each approach.</p>
           <div id="stage0PolicyContainer" class="policy-grid"></div>
         </article>
 
         <article class="panel">
           <div class="panel-head">
-            <h2>06. Region Policy</h2>
+            <h2>06. Region Defaults</h2>
             <span class="tag">Config</span>
           </div>
-          <p class="hint">Apply region-specific baseline rules before final prioritization.</p>
+          <p class="hint">Apply region-specific defaults before final prioritization when needed.</p>
           <div id="regionPolicyContainer" class="policy-grid"></div>
         </article>
 
@@ -137,7 +137,7 @@
       <aside class="side-column">
         <article class="panel side">
           <div class="panel-head">
-            <h2>Current Config Snapshot</h2>
+            <h2>Current Model Snapshot</h2>
           </div>
           <pre id="configPreview" class="json-preview"></pre>
         </article>

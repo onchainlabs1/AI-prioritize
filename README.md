@@ -6,6 +6,22 @@ This portfolio project demonstrates how to prioritize AI initiatives with a tran
 
 Current version: `0.3.4`
 
+## Current product module
+The most current working surface in this repository is [enterprise-ai-prioritizer/README.md](./enterprise-ai-prioritizer/README.md).
+
+That module now presents the solution as a lighter decision workbench:
+1. submit and route initiatives
+2. assess value, readiness, and feasibility
+3. register decisions with rationale
+4. keep an audit trail in SQLite
+
+## Current UI snapshots
+### Decision dashboard
+![Decision dashboard](./enterprise-ai-prioritizer/docs/screenshots/decision-dashboard.png)
+
+### Assessment workspace
+![Assessment workspace](./enterprise-ai-prioritizer/docs/screenshots/assessment-workspace.png)
+
 ## Project objective
 Enable architecture and governance teams to answer:
 1. Should this initiative even use AI?

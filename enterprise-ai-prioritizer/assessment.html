@@ -18,18 +18,18 @@
       <div class="hero-glow two"></div>
       <div class="hero">
         <p class="eyebrow">Enterprise AI Portfolio Intelligence</p>
-        <h1>Quick AI Initiative Assessment</h1>
+        <h1>Quick Prioritization Assessment</h1>
         <p>
-          Minimal view for day-to-day prioritization. Use this page to score and decide.
+          A fast working view to compare value, effort, readiness, and the best next step.
         </p>
         <nav class="top-nav">
           <a href="./index.html">Home</a>
           <a href="./submit.html">Submit</a>
-          <a href="./triage.html">Triage Queue</a>
-          <a href="./board.html">Board View</a>
+          <a href="./triage.html">Queue</a>
+          <a href="./board.html">Decisions</a>
           <a href="./assessment.html" class="active">Assessment</a>
-          <a href="./config.html">Admin</a>
-          <a href="./how-it-works.html">Method</a>
+          <a href="./config.html">Settings</a>
+          <a href="./how-it-works.html">Approach</a>
         </nav>
       </div>
     </header>
@@ -38,13 +38,13 @@
       <section class="main-column">
         <article class="panel compact-note" style="--delay: 0ms">
           <div class="panel-head">
-            <h2>What Matters Here</h2>
+            <h2>Fast Pass</h2>
             <span class="tag">Focus</span>
           </div>
           <ul class="clean-list">
-            <li>Assess one initiative quickly with a defendable method.</li>
-            <li>Save a clear decision record for board review.</li>
-            <li>Move details, methodology, and policy tuning to dedicated pages.</li>
+            <li>Use defaults to get to a recommendation quickly.</li>
+            <li>Adjust checks and scoring only when the initiative needs a closer look.</li>
+            <li>Save the outcome when you are ready to move the item forward.</li>
           </ul>
         </article>
 
@@ -54,15 +54,18 @@
             <span class="tag">Record</span>
           </div>
           <p id="initiativeContext" class="hint">
-            Open this page with `?id=<initiative-id>` from Triage Queue to save an auditable assessment.
+            Open this page with `?id=<initiative-id>` from the queue to save this assessment.
           </p>
         </article>
 
         <article class="panel" style="--delay: 0ms">
           <div class="panel-head">
-            <h2>01. Quick Input</h2>
+            <h2>01. Quick Pass</h2>
             <span class="tag">Input</span>
           </div>
+          <p class="hint">
+            Start with the business context and best-fit approach. If the item looks promising, you can refine it below.
+          </p>
           <div class="grid two">
             <label>
               Project name
@@ -83,7 +86,7 @@
               </select>
             </label>
             <label>
-              Candidate route
+              Best-fit approach
               <select id="stage0Fit">
                 <option value="genai_rag">GenAI / RAG candidate</option>
                 <option value="agentic">Agentic candidate</option>
@@ -94,7 +97,7 @@
             </label>
           </div>
           <details class="compact-advanced">
-            <summary>Advanced fields</summary>
+            <summary>Additional context</summary>
             <div class="grid two">
               <label>
                 Regulatory region
@@ -111,11 +114,11 @@
 
         <article class="panel" style="--delay: 80ms">
           <div class="panel-head">
-            <h2>02. Mandatory Gates</h2>
-            <span class="tag critical">Pass / Conditional / Fail</span>
+            <h2>02. Delivery Checks</h2>
+            <span class="tag critical">Quick checks</span>
           </div>
           <p class="hint">
-            Keep this section strict. If a gate fails, the initiative should not move forward now.
+            Keep these simple. They are here to catch obvious blockers before you invest more time.
           </p>
           <div class="gates-grid">
             <label class="gate-row">
@@ -155,27 +158,64 @@
 
         <article class="panel" style="--delay: 140ms">
           <div class="panel-head">
-            <h2>03. Weighted Scoring</h2>
-            <span class="tag">Score + Evidence</span>
+            <h2>03. Score Drivers</h2>
+            <span class="tag">Advanced</span>
           </div>
           <p class="hint">
-            Score from 1-5. Adjust only what is needed for this initiative.
+            Defaults are enough for a quick pass. Open this section only if you want to tune the recommendation.
           </p>
-          <div class="weight-toolbar">
-            <div id="weightsTotal" class="weight-total">Weight total entered: 100%</div>
-            <button id="normalizeWeightsButton" class="tertiary" type="button">
-              Normalize Weights to 100%
-            </button>
-          </div>
-          <div id="criteriaContainer" class="criteria"></div>
+          <details id="scoringDetails" class="compact-advanced scoring-advanced">
+            <summary>Refine score drivers and confidence</summary>
+            <div class="weight-toolbar">
+              <div id="weightsTotal" class="weight-total">Weight total entered: 100%</div>
+              <button id="normalizeWeightsButton" class="tertiary" type="button">
+                Normalize Weights to 100%
+              </button>
+            </div>
+            <div id="criteriaContainer" class="criteria"></div>
+          </details>
         </article>
 
         <article class="panel" style="--delay: 200ms">
           <div class="panel-head">
-            <h2>04. Decision</h2>
+            <h2>04. Recommendation</h2>
             <span class="tag">Output</span>
           </div>
           <p id="modelSummary" class="hint"></p>
+          <div class="decision-summary">
+            <div class="decision-summary-head">
+              <span id="decisionPill" class="pill neutral">Awaiting assessment</span>
+              <h3 id="decisionHeadline">Run the quick pass to see a recommendation.</h3>
+              <p id="decisionNarrative" class="hint">
+                Start with the defaults, then refine only if the initiative needs more scrutiny.
+              </p>
+            </div>
+            <div class="decision-strip">
+              <div class="metric">
+                <span>Score</span>
+                <strong id="scoreValue">--</strong>
+              </div>
+              <div class="metric">
+                <span>Lane</span>
+                <strong id="laneValue">--</strong>
+              </div>
+              <div class="metric">
+                <span>Checks</span>
+                <strong id="gateValue">--</strong>
+              </div>
+              <div class="metric">
+                <span>Confidence</span>
+                <strong id="confidenceValue">--</strong>
+              </div>
+            </div>
+            <div class="progress-track" aria-hidden="true">
+              <div id="scoreBar" class="progress-bar"></div>
+            </div>
+            <div class="decision-next-step">
+              <strong>Suggested next step</strong>
+              <p id="nextStepText" class="hint">No recommendation yet.</p>
+            </div>
+          </div>
           <div class="actions">
             <button id="runButton">Calculate Priority</button>
             <button id="saveAssessmentButton" class="secondary">Save Assessment</button>
@@ -183,30 +223,10 @@
             <button id="resetButton" class="secondary">Reset</button>
           </div>
           <p id="assessmentStatus" class="hint"></p>
-
-          <div class="decision-strip">
-            <div class="metric">
-              <span>Score</span>
-              <strong id="scoreValue">--</strong>
-            </div>
-            <div class="metric">
-              <span>Lane</span>
-              <strong id="laneValue">--</strong>
-            </div>
-            <div class="metric">
-              <span>Gates</span>
-              <strong id="gateValue">--</strong>
-            </div>
-            <div class="metric">
-              <span>Confidence</span>
-              <strong id="confidenceValue">--</strong>
-            </div>
-          </div>
-          <div class="progress-track" aria-hidden="true">
-            <div id="scoreBar" class="progress-bar"></div>
-          </div>
-
-          <div id="result" class="result empty">Fill the fields and click "Calculate Priority".</div>
+          <details class="compact-advanced report-details">
+            <summary>View full rationale and score breakdown</summary>
+            <div id="result" class="result empty">Fill the fields and click "Calculate Priority".</div>
+          </details>
         </article>
       </section>
     </main>

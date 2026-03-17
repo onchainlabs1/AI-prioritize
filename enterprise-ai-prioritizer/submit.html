@@ -18,16 +18,16 @@
         <p class="eyebrow">AI Initiative Prioritization Workbench</p>
         <h1>Submit Idea</h1>
         <p>
-          Submit AI automation opportunities through a structured intake flow.
+          Capture AI opportunities with enough context to compare value, effort, and next steps.
         </p>
         <nav class="top-nav">
           <a href="./index.html">Home</a>
           <a href="./submit.html" class="active">Submit</a>
-          <a href="./triage.html">Triage Queue</a>
-          <a href="./board.html">Board View</a>
+          <a href="./triage.html">Queue</a>
+          <a href="./board.html">Decisions</a>
           <a href="./assessment.html">Assessment</a>
-          <a href="./config.html">Admin</a>
-          <a href="./how-it-works.html">Method</a>
+          <a href="./config.html">Settings</a>
+          <a href="./how-it-works.html">Approach</a>
         </nav>
       </div>
     </header>
@@ -36,7 +36,7 @@
       <section class="main-column">
         <article class="panel">
           <div class="panel-head">
-            <h2>Initiative Intake Form</h2>
+            <h2>Opportunity Intake</h2>
             <span class="tag">MVP</span>
           </div>
           <form id="submitForm" class="grid two">
@@ -93,12 +93,12 @@
               <textarea id="attachments" rows="2"></textarea>
             </label>
             <label>
-              Initial owner (reviewer)
+              Suggested owner
               <input id="owner" type="text" placeholder="e.g. architecture.board" />
             </label>
             <div class="actions full">
               <button type="submit">Submit Initiative</button>
-              <a class="btn-link" href="./triage.html">Go to Queue</a>
+              <a class="btn-link" href="./triage.html">Open Queue</a>
             </div>
             <p id="submitStatus" class="hint full"></p>
           </form>

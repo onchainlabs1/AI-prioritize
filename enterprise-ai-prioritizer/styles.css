@@ -478,6 +478,40 @@ button.tertiary {
   gap: 0.55rem;
 }
 
+.decision-summary {
+  border: 1px solid #dfe7f1;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+  padding: 0.9rem;
+}
+
+.decision-summary-head h3 {
+  margin: 0.55rem 0 0.35rem;
+  font-size: 1.15rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.decision-summary-head .hint {
+  margin-bottom: 0;
+}
+
+.decision-next-step {
+  margin-top: 0.85rem;
+  border-top: 1px solid #e4eaf4;
+  padding-top: 0.8rem;
+}
+
+.decision-next-step strong {
+  display: block;
+  font-size: 0.85rem;
+  color: #243449;
+}
+
+.decision-next-step .hint {
+  margin: 0.28rem 0 0;
+}
+
 .metric {
   border: 1px solid #dfe7f1;
   border-radius: 12px;
@@ -551,6 +585,11 @@ button.tertiary {
   color: var(--bad);
 }
 
+.pill.neutral {
+  background: #eef2fa;
+  color: #405066;
+}
+
 .clean-list {
   margin: 0;
   padding-left: 1rem;
@@ -599,6 +638,22 @@ button.tertiary {
   color: #111827;
 }
 
+.kpi-card:first-child {
+  background: linear-gradient(180deg, #ffffff 0%, #f2fbf5 100%);
+}
+
+.kpi-card:nth-child(2) {
+  background: linear-gradient(180deg, #ffffff 0%, #fff8ec 100%);
+}
+
+.kpi-card:nth-child(3) {
+  background: linear-gradient(180deg, #ffffff 0%, #f8faff 100%);
+}
+
+.kpi-card:nth-child(4) {
+  background: linear-gradient(180deg, #ffffff 0%, #f3f8ff 100%);
+}
+
 .compact-note .clean-list {
   margin-top: 0.35rem;
 }
@@ -619,6 +674,21 @@ button.tertiary {
 
 .compact-advanced .grid {
   margin-top: 0.65rem;
+}
+
+.scoring-advanced[open] {
+  background: linear-gradient(180deg, #fbfdff 0%, #f7fbff 100%);
+}
+
+.report-details summary,
+.scoring-advanced summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: #2b3850;
+}
+
+.report-details .result {
+  margin-top: 0.75rem;
 }
 
 .status-ok {

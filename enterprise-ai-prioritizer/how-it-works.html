@@ -20,17 +20,16 @@
         <p class="eyebrow">AI Initiative Prioritization Workbench</p>
         <h1>How the platform works</h1>
         <p>
-          A transparent decision workflow that converts ideas into auditable,
-          board-ready prioritization decisions.
+          A practical decision workflow that helps teams compare AI ideas, focus on the right next moves, and keep rationale visible.
         </p>
         <nav class="top-nav">
           <a href="./index.html">Home</a>
           <a href="./submit.html">Submit</a>
-          <a href="./triage.html">Triage Queue</a>
-          <a href="./board.html">Board View</a>
+          <a href="./triage.html">Queue</a>
+          <a href="./board.html">Decisions</a>
           <a href="./assessment.html">Assessment</a>
-          <a href="./config.html">Admin</a>
-          <a href="./how-it-works.html" class="active">Method</a>
+          <a href="./config.html">Settings</a>
+          <a href="./how-it-works.html" class="active">Approach</a>
         </nav>
       </div>
     </header>
@@ -39,114 +38,115 @@
       <section class="main-column">
         <article class="panel">
           <div class="panel-head">
-            <h2>What This Tool Solves</h2>
+            <h2>What This Workbench Helps You Decide</h2>
             <span class="tag">Purpose</span>
           </div>
           <p class="hint">
-            The workbench helps enterprise teams avoid AI hype decisions by
-            applying a clear method:
+            The goal is not to create more process. The goal is to help teams make better portfolio decisions with a shared view of:
           </p>
           <ul class="clean-list">
-            <li>collect initiatives with structured business context;</li>
-            <li>filter ideas that should not use AI (Stage 0);</li>
-            <li>apply route and region policy before prioritization;</li>
-            <li>enforce governance gates before scoring;</li>
-            <li>prioritize with weighted criteria and evidence quality;</li>
-            <li>record board decisions with audit trail.</li>
+            <li>which ideas look strong enough to move now;</li>
+            <li>which ones deserve planning next;</li>
+            <li>which ones still need clearer scope, ownership, or evidence;</li>
+            <li>which ones should be reframed before more time is spent.</li>
           </ul>
         </article>
 
         <article class="panel">
           <div class="panel-head">
-            <h2>Workflow Diagram</h2>
-            <span class="tag">Decision Flow</span>
+            <h2>Decision Flow</h2>
+            <span class="tag">Workflow</span>
           </div>
           <div class="workflow-rail" aria-label="Tool workflow">
             <article class="workflow-card">
               <span class="workflow-step-id">1</span>
               <h3>Submit Idea</h3>
-              <p>Requester provides business problem, owner, KPI, and data context.</p>
+              <p>Capture the problem, expected outcome, owner, and basic business context.</p>
             </article>
             <article class="workflow-card">
               <span class="workflow-step-id">2</span>
-              <h3>Triage Queue</h3>
-              <p>Reviewers filter by status, unit, lane, and owner to route work.</p>
+              <h3>Review Queue</h3>
+              <p>Quickly scan incoming work, assign ownership, and route the right items forward.</p>
             </article>
             <article class="workflow-card">
               <span class="workflow-step-id">3</span>
-              <h3>Stage 0 + Gates</h3>
-              <p>Check AI appropriateness and mandatory Pass/Conditional/Fail gates.</p>
+              <h3>Fit + Readiness</h3>
+              <p>Check whether AI is a sensible fit and catch obvious blockers early.</p>
             </article>
             <article class="workflow-card">
               <span class="workflow-step-id">4</span>
-              <h3>Weighted Scoring</h3>
-              <p>Score impact, feasibility, economics, risk, and readiness.</p>
+              <h3>Recommendation</h3>
+              <p>Compare value, feasibility, economics, and confidence in one consistent view.</p>
             </article>
             <article class="workflow-card">
               <span class="workflow-step-id">5</span>
-              <h3>Board Decision</h3>
-              <p>Approve, hold, reject, or approve with conditions and rationale.</p>
+              <h3>Decision + Next Step</h3>
+              <p>Choose whether to move now, plan next, hold, or stop, with visible rationale.</p>
             </article>
           </div>
         </article>
 
         <article class="panel">
           <div class="panel-head">
-            <h2>Decision Logic Summary</h2>
-            <span class="tag">Method</span>
-          </div>
-          <div class="grid three">
-            <div class="mini-card">
-              <strong>Stage 0</strong>
-              <p>Route the initiative as GenAI/RAG, agentic, classical ML, deterministic, or not suitable.</p>
-            </div>
-            <div class="mini-card">
-              <strong>Policy</strong>
-              <p>Stage 0 route and regulatory region apply minimum gate states, threshold deltas, and tier caps.</p>
-            </div>
-            <div class="mini-card">
-              <strong>Scoring</strong>
-              <p>Weighted criteria plus evidence multipliers produce a decision score and a confidence index.</p>
-            </div>
-          </div>
-        </article>
-
-        <article class="panel">
-          <div class="panel-head">
-            <h2>Current Policy Layers</h2>
+            <h2>What Drives The Recommendation</h2>
             <span class="tag">Model</span>
           </div>
           <div class="grid two">
             <div class="mini-card">
-              <strong>Stage 0 route policy</strong>
-              <p>`agentic` is stricter than `genai_rag`, and `not suitable` becomes immediate `NO-GO`.</p>
+              <strong>Business value</strong>
+              <p>How meaningful the expected impact is for revenue, cost, risk, customer experience, or operations.</p>
             </div>
             <div class="mini-card">
-              <strong>Region policy</strong>
-              <p>`EU`, `US`, `EU + US`, and `Global` each apply different minimum gate expectations and thresholds.</p>
+              <strong>Time-to-value</strong>
+              <p>How quickly the initiative can create useful results and whether the timing actually matters.</p>
             </div>
             <div class="mini-card">
-              <strong>Gate behavior</strong>
-              <p>`Fail` blocks immediately. `Conditional` can reduce the score and cap the maximum tier.</p>
+              <strong>Feasibility</strong>
+              <p>How realistic delivery looks based on data, systems, operating model, and implementation effort.</p>
             </div>
             <div class="mini-card">
-              <strong>Evidence behavior</strong>
-              <p>Weak evidence reduces criterion contribution and also lowers the reported confidence index.</p>
+              <strong>Confidence</strong>
+              <p>How strong the evidence is behind the recommendation, so weaker assumptions are visible instead of hidden.</p>
             </div>
           </div>
         </article>
 
         <article class="panel">
           <div class="panel-head">
-            <h2>How To Read Results</h2>
+            <h2>How To Read The Outcome</h2>
             <span class="tag">Interpretation</span>
           </div>
+          <div class="grid two">
+            <div class="mini-card">
+              <strong>Tier A: move now</strong>
+              <p>The initiative looks strong enough to move with urgency and clear momentum.</p>
+            </div>
+            <div class="mini-card">
+              <strong>Tier B: plan next</strong>
+              <p>The case is promising, but the best next step is planning, shaping, or targeted discovery.</p>
+            </div>
+            <div class="mini-card">
+              <strong>Tier C: incubate</strong>
+              <p>The idea may still matter later, but it is not yet clear or strong enough for commitment.</p>
+            </div>
+            <div class="mini-card">
+              <strong>Not a fit now</strong>
+              <p>The idea should be reframed, paused, or stopped before more portfolio time is invested.</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>What Happens Behind The Scenes</h2>
+            <span class="tag">Built in</span>
+          </div>
           <ul class="clean-list">
-            <li>`Tier A`: prioritize now, assuming policy and gates allow it.</li>
-            <li>`Tier B`: plan next, usually with more discovery or controls.</li>
-            <li>`Tier C`: incubate or rework before portfolio commitment.</li>
-            <li>`NO-GO`: blocked by Stage 0, failed gates, or unmet policy baseline.</li>
-            <li>When blocked, the tool shows a diagnostic score for context, not as an approval signal.</li>
+            <li>the tool applies a best-fit route for the type of initiative being assessed;</li>
+            <li>simple readiness checks surface blockers before more effort is spent;</li>
+            <li>weighted scoring keeps comparisons consistent across initiatives;</li>
+            <li>evidence quality adjusts confidence so assumptions stay visible;</li>
+            <li>decision history stays attached to the initiative for future review.</li>
           </ul>
         </article>
       </section>
@@ -154,16 +154,28 @@
       <aside class="side-column">
         <article class="panel side">
           <div class="panel-head">
-            <h2>Key Outputs</h2>
-            <span class="tag">Executive View</span>
+            <h2>What Teams Get</h2>
+            <span class="tag">Outputs</span>
           </div>
           <ul class="clean-list">
-            <li>Priority lane (`Tier A`, `Tier B`, `Tier C`, `NO-GO`)</li>
-            <li>Decision score or blocked diagnostic score</li>
-            <li>Explainable score breakdown</li>
-            <li>Gate, policy, and rationale summary</li>
-            <li>Board decision history</li>
-            <li>Audit trail per initiative</li>
+            <li>a clear recommendation and lane for each initiative</li>
+            <li>a comparable score across opportunities</li>
+            <li>visible rationale instead of ad-hoc judgment</li>
+            <li>a record of decisions and follow-up direction</li>
+            <li>shared language for business, product, and architecture teams</li>
+          </ul>
+        </article>
+
+        <article class="panel side">
+          <div class="panel-head">
+            <h2>Designed To Stay Lightweight</h2>
+            <span class="tag">Principles</span>
+          </div>
+          <ul class="clean-list">
+            <li>defaults first, detail only when needed</li>
+            <li>fast comparison before deep analysis</li>
+            <li>decision support, not decision theater</li>
+            <li>enough structure to stay consistent without slowing teams down</li>
           </ul>
         </article>
 
@@ -173,7 +185,7 @@
           </div>
           <div class="actions">
             <a class="btn-link" href="./submit.html">Open Submit Form</a>
-            <a class="btn-link" href="./triage.html">Open Triage Queue</a>
+            <a class="btn-link" href="./triage.html">Open Review Queue</a>
             <a class="btn-link" href="./assessment.html">Open Assessment</a>
           </div>
         </article>

@@ -18,75 +18,100 @@
       <div class="hero-glow two"></div>
       <div class="hero">
         <p class="eyebrow">AI Initiative Prioritization Workbench</p>
-        <h1>Portfolio Command Center</h1>
+        <h1>Portfolio Priorities At A Glance</h1>
         <p>
-          Decide what to prioritize now, what to incubate, and what to stop with a transparent
-          enterprise workflow.
+          Compare ideas, focus on the best next moves, and keep decisions visible across the
+          portfolio.
         </p>
         <nav class="top-nav">
           <a href="./index.html" class="active">Home</a>
           <a href="./submit.html">Submit</a>
-          <a href="./triage.html">Triage Queue</a>
+          <a href="./triage.html">Queue</a>
           <a href="./assessment.html">Assessment</a>
-          <a href="./board.html">Board View</a>
-          <a href="./config.html">Admin</a>
-          <a href="./how-it-works.html">Method</a>
+          <a href="./board.html">Decisions</a>
+          <a href="./config.html">Settings</a>
+          <a href="./how-it-works.html">Approach</a>
         </nav>
       </div>
     </header>
 
-    <main class="workspace compact-workspace">
+    <main class="workspace">
       <section class="main-column">
         <article class="panel" style="--delay: 0ms">
           <div class="panel-head">
-            <h2>Portfolio Snapshot</h2>
+            <h2>Decision Snapshot</h2>
             <span class="tag">Live</span>
           </div>
           <div class="dashboard-kpis">
             <div class="kpi-card">
-              <span>Submitted</span>
-              <strong id="kpiSubmitted">0</strong>
+              <span>Move now</span>
+              <strong id="kpiNow">0</strong>
             </div>
             <div class="kpi-card">
-              <span>In Assessment</span>
-              <strong id="kpiAssessment">0</strong>
+              <span>Need decision</span>
+              <strong id="kpiDecision">0</strong>
             </div>
             <div class="kpi-card">
-              <span>Board Review</span>
-              <strong id="kpiBoard">0</strong>
+              <span>Need clarity</span>
+              <strong id="kpiClarity">0</strong>
             </div>
             <div class="kpi-card">
-              <span>Approved</span>
+              <span>Approved momentum</span>
               <strong id="kpiApproved">0</strong>
             </div>
           </div>
+          <p id="executiveSummary" class="hint">
+            Loading the current portfolio picture.
+          </p>
         </article>
 
         <article class="panel" style="--delay: 60ms">
           <div class="panel-head">
-            <h2>Top Priority Queue</h2>
+            <h2>Recommended Now</h2>
             <span id="priorityCount" class="tag">0</span>
           </div>
-          <p class="hint">Top initiatives by priority lane and score ready for action.</p>
+          <p class="hint">The strongest near-term opportunities based on current lane, score, and readiness.</p>
           <div id="priorityList" class="queue-list"></div>
+        </article>
+
+        <article class="panel" style="--delay: 100ms">
+          <div class="panel-head">
+            <h2>Needs A Call</h2>
+            <span id="decisionCount" class="tag">0</span>
+          </div>
+          <p class="hint">Items that are ready for a decision or should be pulled back into focus.</p>
+          <div id="decisionQueueList" class="queue-list"></div>
         </article>
       </section>
 
       <aside class="side-column">
         <article class="panel side" style="--delay: 120ms">
           <div class="panel-head">
-            <h2>Attention Alerts</h2>
+            <h2>Needs Clarity</h2>
             <span class="tag critical">Focus</span>
           </div>
+          <p class="hint">These items are worth attention before they become real portfolio decisions.</p>
           <ul id="alertList" class="clean-list"></ul>
         </article>
 
         <article class="panel side" style="--delay: 160ms">
           <div class="panel-head">
             <h2>Recent Decisions</h2>
-            <span class="tag">Board</span>
+            <span class="tag">Latest</span>
           </div>
           <ul id="decisionList" class="clean-list"></ul>
+        </article>
+
+        <article class="panel side" style="--delay: 200ms">
+          <div class="panel-head">
+            <h2>Jump Back In</h2>
+            <span class="tag">Actions</span>
+          </div>
+          <div class="actions">
+            <a class="btn-link" href="./triage.html">Open Queue</a>
+            <a class="btn-link" href="./board.html">Open Decisions</a>
+            <a class="btn-link" href="./submit.html">Submit New Idea</a>
+          </div>
         </article>
       </aside>
     </main>

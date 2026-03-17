@@ -2,81 +2,80 @@
 
 Application module for the **AI Architect Decision Workbench**.
 
-For portfolio-level context and methodology details, see [../README.md](../README.md).
+This module is the working product surface: teams submit initiatives, compare opportunities, save assessments, register decisions, and keep an audit trail in SQLite. The current UX is intentionally lighter than a governance portal. Governance is still present, but it sits behind a practical decision flow instead of dominating the experience.
 
-## Scope
-This module provides an enterprise-style decision workflow:
-1. Intake idea submission.
-2. Triage filtering and routing.
-3. Stage 0 + route/region policy + gates + weighted assessment.
-4. Board decision registration.
-5. Audit-ready persistence in SQLite.
+For broader portfolio context, see [../README.md](../README.md).
 
-## Architecture
-Core files:
-1. `decision-engine.js`: deterministic prioritization logic (Stage 0, route/region policy, gates, scoring, lane mapping).
-2. `initiative-store.js`: frontend API client + payload normalization/validation helpers.
-3. `settings.js`: model configuration persistence.
-4. `server.py`: HTTP API + SQLite database (`data/initiatives.db`) + static serving.
-5. `dashboard.js`, `submit.js`, `triage.js`, `app.js`, `board.js`, `config.js`: UI controllers for each page.
+## What the product does
+The workbench helps teams answer four practical questions:
+1. Is this actually a good AI opportunity?
+2. Is it ready enough to move now?
+3. What needs a decision versus more clarity?
+4. What was decided, why, and based on what evidence?
 
-UI pages:
-1. `index.html`: home dashboard (portfolio command center).
-2. `submit.html`: intake form.
-3. `triage.html`: queue and filters.
-4. `assessment.html`: initiative assessment.
-5. `board.html`: board decisions.
-6. `config.html`: weights, thresholds, gate behavior, evidence, and policy configuration.
-7. `how-it-works.html`: product overview and visual workflow.
+The current flow is:
+1. `Submit`: capture the initiative, sponsor, value hypothesis, and delivery context.
+2. `Queue`: move work through triage and route the right items into assessment.
+3. `Assessment`: use a quick pass, delivery checks, and weighted score drivers to produce a recommendation.
+4. `Decision Review`: record approve, hold, reject, or proceed-with-follow-ups decisions.
+5. `Dashboard`: surface what to move now, what needs a call, and what needs more clarity.
 
-## Current decision behavior
-1. Stage 0 route is prescriptive:
-- `not_suitable` is immediate `NO-GO`
-- other routes can apply tier caps, threshold deltas, and minimum gate expectations
+## Product surfaces
+Core pages:
+1. `index.html`: decision dashboard with recommended-now items, decision queue, clarity blockers, and recent decisions.
+2. `submit.html`: lightweight intake form for new initiatives.
+3. `triage.html`: operational queue for filtering and routing work.
+4. `assessment.html`: assessment workspace with `Fast Pass`, `Delivery Checks`, advanced `Score Drivers`, and an executive recommendation.
+5. `board.html`: decision review queue and rationale capture.
+6. `config.html`: advanced settings for weights, thresholds, evidence multipliers, and policy defaults.
+7. `how-it-works.html`: narrative explanation of the flow and scoring logic.
 
-2. Region is prescriptive:
-- `EU`, `US`, `EU + US`, and `Global` each apply a built-in policy profile
-- unmet route/region policy baseline results in `NO-GO`
+Backend and supporting logic:
+1. `server.py`: HTTP API, static serving, and SQLite persistence in `data/initiatives.db`.
+2. `decision-engine.js`: deterministic recommendation logic for fit, gates, score, confidence, and lane mapping.
+3. `initiative-store.js`: frontend API client and payload normalization helpers.
+4. `dashboard.js`, `triage.js`, `app.js`, `board.js`, `config.js`: page controllers.
 
-3. Scores have two meanings:
-- `decision score` is used only when the initiative is not blocked
-- `diagnostic score` is shown when blocked, strictly as context
+## Screenshots
 
-4. Confidence is derived from evidence multipliers:
-- evidence quality lowers both contribution and reported confidence
+### Decision dashboard
+![Decision dashboard](./docs/screenshots/decision-dashboard.png)
 
-## Engineering Best Practices Implemented
-1. **Input quality controls**
-- required intake fields are validated before persistence
-- email format is validated
-- user text is normalized and length-limited by field
+### Assessment workspace
+![Assessment workspace](./docs/screenshots/assessment-workspace.png)
 
-2. **Workflow integrity**
-- explicit state machine (`STATUS_TRANSITIONS`)
-- invalid status jumps are blocked (e.g., `submitted -> approved`)
-- board decisions only apply when status transition is valid
+### Decision review
+![Decision review](./docs/screenshots/decision-review.png)
 
-3. **Auditability**
-- immutable initiative identity (`id`, `createdAt`) during updates
-- audit entries on creation, status changes, assessment saves, board decisions
-- bounded audit retention to prevent unbounded growth
+### How it works
+![How it works](./docs/screenshots/how-it-works.png)
 
-4. **Safer rendering**
-- queue and board pages render user data via DOM APIs (`textContent`)
-- avoids interpolating user input into raw `innerHTML`
+## Decision model
+The recommendation engine still has structure and discipline, but the product now exposes it in a more lightweight way:
+1. `Fit check`: screens whether the initiative is a sensible AI candidate and what approach fits best.
+2. `Delivery checks`: captures the readiness signals that can block or constrain the recommendation.
+3. `Weighted score drivers`: scores business impact, economics, feasibility, and related factors.
+4. `Evidence-aware confidence`: reduces confidence when the case is based on assumptions rather than validated evidence.
+5. `Lane mapping`: turns the result into a practical recommendation such as move now, plan next, explore further, or stop.
 
-5. **Deterministic testing**
-- unit tests cover decision logic and API client/validation behaviors
-- status transition guards and payload validation are tested
+If an initiative is blocked by a hard fail, the app still shows diagnostic context, but it does not present that as an approval signal.
 
-## Workflow Statuses
+## Workflow and persistence
+Workflow states are enforced in the backend:
 `draft -> submitted -> triage -> assessment -> board_review -> approved/approved_with_conditions -> in_delivery -> closed`
 
 Alternative branches:
-- `hold`
-- `rejected`
+1. `hold`
+2. `rejected`
 
-## Local Run
+Operational safeguards already implemented:
+1. payload validation and text normalization on intake
+2. explicit status transition guards
+3. audit events for creation, status changes, assessment saves, and board decisions
+4. immutable identity fields for persisted initiatives
+5. safer rendering of user content through DOM APIs instead of raw HTML interpolation
+
+## Local run
 ```bash
 cd enterprise-ai-prioritizer
 python3 server.py --host 127.0.0.1 --port 8787
@@ -95,9 +94,25 @@ Open:
 From repository root:
 ```bash
 npm test
+npm run test:e2e
 ```
 
-## Current Limitations
-1. Local SQLite is designed for single-instance/dev usage, not multi-node production.
-2. No corporate SSO/RBAC enforcement yet (placeholder actor values are used).
-3. No binary file upload storage yet (attachments are references/notes text).
+The E2E flow currently covers:
+1. initiative submission
+2. triage status movement
+3. assessment save
+4. board decision
+5. API and SQLite persistence checks
+
+## Regenerating README screenshots
+From repository root:
+```bash
+node enterprise-ai-prioritizer/scripts/capture-readme-screenshots.mjs
+```
+
+The script boots the local Python server on port `8791`, captures the current UI, and writes PNGs to `enterprise-ai-prioritizer/docs/screenshots/`.
+
+## Current limitations
+1. SQLite is still intended for local and single-instance usage, not multi-node production.
+2. SSO and RBAC are not implemented yet.
+3. Attachments are still represented as references/notes, not managed binary uploads.
