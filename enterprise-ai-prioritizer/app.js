@@ -9,6 +9,11 @@ import {
   sanitizeWeight,
   useCaseHint,
 } from "./decision-engine.js";
+import {
+  getInitiativeById,
+  saveInitiativeAssessment,
+  setInitiativeStatus,
+} from "./initiative-store.js";
 import { loadConfig } from "./settings.js";
 
 const SELECTION_COMPONENTS = [
@@ -17,7 +22,7 @@ const SELECTION_COMPONENTS = [
   "Time-to-value and delivery urgency",
   "Technical and data feasibility",
   "Operating model readiness and adoption",
-  "Regulatory, security, and data governance risk controls",
+  "Key readiness, risk, and delivery constraints",
 ];
 
 const STAGE0_LABELS = {
@@ -51,11 +56,21 @@ const el = {
   gateValue: document.getElementById("gateValue"),
   confidenceValue: document.getElementById("confidenceValue"),
   scoreBar: document.getElementById("scoreBar"),
+  initiativeContext: document.getElementById("initiativeContext"),
+  saveAssessmentButton: document.getElementById("saveAssessmentButton"),
+  assessmentStatus: document.getElementById("assessmentStatus"),
+  decisionPill: document.getElementById("decisionPill"),
+  decisionHeadline: document.getElementById("decisionHeadline"),
+  decisionNarrative: document.getElementById("decisionNarrative"),
+  nextStepText: document.getElementById("nextStepText"),
 };
 
 let lastReport = "";
+let lastComputedReport = null;
 const runtime = {
   config: mergeWithDefaultConfig(loadConfig()),
+  initiativeId: null,
+  initiative: null,
 };
 
 function weightInputId(key) {
@@ -142,7 +157,11 @@ function getScores(config, activeCriteria) {
     scoreInput[criterion.key] = Number(document.getElementById(criterion.key).value);
     evidenceInput[criterion.key] = document.getElementById(evidenceInputId(criterion.key)).value;
   });
-  return evaluateScores(scoreInput, activeCriteria, evidenceInput, config);
+  return {
+    scoreInput,
+    evidenceInput,
+    evaluation: evaluateScores(scoreInput, activeCriteria, evidenceInput, config),
+  };
 }
 
 function refreshWeightVisualization(config) {
@@ -173,9 +192,81 @@ function updateModelSummary(config) {
     return;
   }
   el.modelSummary.textContent =
-    `Thresholds: Tier A >= ${config.thresholds.tierA}, Tier B >= ${config.thresholds.tierB}. ` +
-    `Conditional gate penalty: ${config.gates.conditionalPenalty} each. ` +
-    `Max tier with conditional gates: ${config.gates.maxTierIfConditional}.`;
+    `Tier A starts at ${config.thresholds.tierA} and Tier B at ${config.thresholds.tierB}. ` +
+    `Conditional checks reduce momentum by ${config.gates.conditionalPenalty} points each and can cap the lane at Tier ${config.gates.maxTierIfConditional}.`;
+}
+
+function getDecisionSummary(report) {
+  if (report.classification.blocked) {
+    if (report.stage0Choice === "not_suitable") {
+      return {
+        pill: "Needs reframing",
+        pillClass: "bad",
+        headline: "This looks like a process problem before it looks like an AI priority.",
+        narrative:
+          "The current shape of the initiative does not point to the right AI approach yet.",
+        nextStep:
+          "Rework the problem statement, clarify the process change needed, then reassess.",
+      };
+    }
+    return {
+      pill: "Blocked for now",
+      pillClass: "bad",
+      headline: "A readiness issue is blocking this from moving forward today.",
+      narrative:
+        "The initiative may still be valuable, but one or more key checks need attention first.",
+      nextStep:
+        "Resolve failed checks or missing prerequisites before asking for a decision.",
+    };
+  }
+
+  if (report.classification.lane === "Prioritize now") {
+    return {
+      pill: "Strong candidate",
+      pillClass: "good",
+      headline: "This is a strong near-term candidate.",
+      narrative:
+        "The initiative shows good value, solid feasibility, and enough confidence to move quickly.",
+      nextStep: "Save the assessment and move it into Decision Review.",
+    };
+  }
+
+  if (report.classification.lane === "Plan next") {
+    return {
+      pill: "Worth planning",
+      pillClass: "warn",
+      headline: "This looks promising, but not urgent enough for immediate action.",
+      narrative:
+        "The case is directionally strong, though it still benefits from a bit more alignment or discovery.",
+      nextStep: "Capture the recommendation, then line up the next discovery or planning step.",
+    };
+  }
+
+  return {
+    pill: "Early-stage idea",
+    pillClass: "warn",
+    headline: "This looks interesting, but still needs more evidence or sharper scope.",
+    narrative:
+      "The opportunity may become stronger later, but it is not yet ready for portfolio commitment.",
+    nextStep: "Keep it in discovery, refine the use case, and reassess when the case is stronger.",
+  };
+}
+
+function resetDecisionSummary() {
+  if (el.decisionPill) {
+    el.decisionPill.textContent = "Awaiting assessment";
+    el.decisionPill.className = "pill neutral";
+  }
+  if (el.decisionHeadline) {
+    el.decisionHeadline.textContent = "Run the quick pass to see a recommendation.";
+  }
+  if (el.decisionNarrative) {
+    el.decisionNarrative.textContent =
+      "Start with the defaults, then refine only if the initiative needs more scrutiny.";
+  }
+  if (el.nextStepText) {
+    el.nextStepText.textContent = "No recommendation yet.";
+  }
 }
 
 function buildReport() {
@@ -188,8 +279,9 @@ function buildReport() {
 
   const activeCriteria = getActiveCriteria(config);
   const gate = getGateStatus(config);
-  const scores = getScores(config, activeCriteria);
-  const cls = classify(scores.total, gate, stage0Choice, config);
+  const scoreResult = getScores(config, activeCriteria);
+  const scores = scoreResult.evaluation;
+  const cls = classify(scores.total, gate, stage0Choice, config, { region });
 
   const lines = [];
   lines.push(`Project: ${name}`);
@@ -200,7 +292,12 @@ function buildReport() {
   lines.push("");
   lines.push(`Raw weighted score: ${scores.total}/100`);
   lines.push(`Gate penalty: ${gate.penalty}`);
-  lines.push(`Final decision score: ${cls.adjustedScore}/100`);
+  if (cls.blocked) {
+    lines.push("Final decision: BLOCKED (NO-GO)");
+    lines.push(`Diagnostic score (non-decisive): ${cls.diagnosticScore}/100`);
+  } else {
+    lines.push(`Final decision score: ${cls.adjustedScore}/100`);
+  }
   lines.push(`Tier: ${cls.tier} | Lane: ${cls.lane}`);
   lines.push(`Rationale: ${cls.rationale}`);
   lines.push("");
@@ -242,9 +339,23 @@ function buildReport() {
     text: lines.join("\n"),
     rawScore: scores.total,
     score: cls.adjustedScore,
+    diagnosticScore: cls.diagnosticScore,
+    blocked: cls.blocked,
     confidenceIndex: scores.confidenceIndex,
+    stage0Choice,
+    project: {
+      name,
+      businessUnit: bu,
+      useCaseType,
+      region,
+    },
+    scoreInput: scoreResult.scoreInput,
+    evidenceInput: scoreResult.evidenceInput,
+    weightsInput: Object.fromEntries(activeCriteria.map((criterion) => [criterion.key, criterion.weight])),
+    scores,
     classification: cls,
     gate,
+    configSnapshot: config,
   };
 }
 
@@ -252,16 +363,36 @@ function renderResult(report) {
   const pill = `<span class="pill ${report.classification.css}">Tier ${report.classification.tier}</span>`;
   const gateSummary =
     report.gate.failCount > 0
-      ? `Gates: ${report.gate.failCount} fail / ${report.gate.conditionalCount} conditional`
+      ? `Checks: ${report.gate.failCount} fail / ${report.gate.conditionalCount} conditional`
       : report.gate.conditionalCount > 0
-        ? `Gates: ${report.gate.conditionalCount} conditional`
-        : "Gates: all pass";
+        ? `Checks: ${report.gate.conditionalCount} conditional`
+        : "Checks: all pass";
 
-  if (el.scoreValue) el.scoreValue.textContent = `${report.score}/100`;
+  if (el.scoreValue) {
+    el.scoreValue.textContent = report.classification.blocked ? "Blocked" : `${report.score}/100`;
+  }
   if (el.laneValue) el.laneValue.textContent = report.classification.lane;
-  if (el.gateValue) el.gateValue.textContent = gateSummary.replace("Gates: ", "");
+  if (el.gateValue) el.gateValue.textContent = gateSummary.replace("Checks: ", "");
   if (el.confidenceValue) el.confidenceValue.textContent = `${report.confidenceIndex}/100`;
-  if (el.scoreBar) el.scoreBar.style.width = `${Math.max(0, Math.min(100, report.score))}%`;
+  if (el.scoreBar) {
+    const progress = report.classification.blocked ? 0 : Math.max(0, Math.min(100, Number(report.score) || 0));
+    el.scoreBar.style.width = `${progress}%`;
+  }
+
+  const summary = getDecisionSummary(report);
+  if (el.decisionPill) {
+    el.decisionPill.textContent = summary.pill;
+    el.decisionPill.className = `pill ${summary.pillClass}`;
+  }
+  if (el.decisionHeadline) {
+    el.decisionHeadline.textContent = summary.headline;
+  }
+  if (el.decisionNarrative) {
+    el.decisionNarrative.textContent = summary.narrative;
+  }
+  if (el.nextStepText) {
+    el.nextStepText.textContent = summary.nextStep;
+  }
 
   el.result.classList.remove("empty");
   el.result.innerHTML =
@@ -275,9 +406,12 @@ function renderResult(report) {
 function runCalculation() {
   const report = buildReport();
   lastReport = report.text;
+  lastComputedReport = report;
   refreshWeightVisualization(runtime.config);
   updateModelSummary(runtime.config);
   renderResult(report);
+  void markAssessmentInProgress();
+  return report;
 }
 
 function copyReport() {
@@ -328,8 +462,13 @@ function resetForm() {
   if (el.scoreBar) el.scoreBar.style.width = "0%";
 
   lastReport = "";
+  lastComputedReport = null;
   el.result.className = "result empty";
   el.result.textContent = 'Fill the fields and click "Calculate Priority".';
+  resetDecisionSummary();
+  if (el.assessmentStatus) {
+    el.assessmentStatus.textContent = "";
+  }
   refreshWeightVisualization(config);
   updateModelSummary(config);
 }
@@ -358,12 +497,176 @@ function bindCriteriaListeners() {
   });
 }
 
+function readInitiativeIdFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const id = (params.get("id") || "").trim();
+  return id || null;
+}
+
+function setAssessmentStatus(message, cssClass = "") {
+  if (!el.assessmentStatus) {
+    return;
+  }
+  el.assessmentStatus.textContent = message;
+  el.assessmentStatus.classList.remove("status-ok", "status-warn");
+  if (cssClass) {
+    el.assessmentStatus.classList.add(cssClass);
+  }
+}
+
+function renderInitiativeContext() {
+  if (!el.initiativeContext) {
+    return;
+  }
+  if (!runtime.initiativeId) {
+    el.initiativeContext.textContent =
+      "Open this page with ?id=<initiative-id> from the queue to save this assessment.";
+    return;
+  }
+  if (!runtime.initiative) {
+    el.initiativeContext.textContent = `Initiative ${runtime.initiativeId} was not found in local storage.`;
+    return;
+  }
+
+  const initiative = runtime.initiative;
+  const scoreLabel = initiative.finalScore == null ? "N/A" : `${initiative.finalScore}/100`;
+  el.initiativeContext.textContent =
+    `Linked initiative ${initiative.id} | Status: ${initiative.status} | Owner: ${initiative.owner || "unassigned"} | ` +
+    `Lane: ${initiative.priorityLane || "Unassessed"} | Final score: ${scoreLabel}`;
+}
+
+function maybePrefillFromInitiative() {
+  if (!runtime.initiative) {
+    return;
+  }
+  const initiative = runtime.initiative;
+  if (!el.projectName.value && initiative.title) {
+    el.projectName.value = initiative.title;
+  }
+  if (!el.businessUnit.value && initiative.businessUnit) {
+    el.businessUnit.value = initiative.businessUnit;
+  }
+}
+
+async function loadInitiativeContext() {
+  runtime.initiativeId = readInitiativeIdFromUrl();
+  if (!runtime.initiativeId) {
+    renderInitiativeContext();
+    if (el.saveAssessmentButton) {
+      el.saveAssessmentButton.disabled = true;
+      el.saveAssessmentButton.title = "Open an initiative from the queue to enable save.";
+    }
+    return;
+  }
+
+  try {
+    runtime.initiative = await getInitiativeById(runtime.initiativeId);
+  } catch {
+    runtime.initiative = null;
+  }
+  if (!runtime.initiative) {
+    renderInitiativeContext();
+    if (el.saveAssessmentButton) {
+      el.saveAssessmentButton.disabled = true;
+    }
+    return;
+  }
+
+  if (runtime.initiative.status === "submitted") {
+    try {
+      const updated = await setInitiativeStatus(
+        runtime.initiative.id,
+        "triage",
+        "reviewer",
+        "Initiative opened in assessment workspace."
+      );
+      if (updated) {
+        runtime.initiative = updated;
+      }
+    } catch {
+      // Keep rendering initiative context even if the transition could not be persisted.
+    }
+  }
+
+  maybePrefillFromInitiative();
+  renderInitiativeContext();
+}
+
+async function markAssessmentInProgress() {
+  if (!runtime.initiative || !runtime.initiativeId) {
+    return;
+  }
+  if (runtime.initiative.status === "triage" || runtime.initiative.status === "submitted") {
+    try {
+      const updated = await setInitiativeStatus(
+        runtime.initiative.id,
+        "assessment",
+        "reviewer",
+        "Assessment scoring started."
+      );
+      if (updated) {
+        runtime.initiative = updated;
+        renderInitiativeContext();
+      }
+    } catch {
+      // Non-blocking for local decision analysis.
+    }
+  }
+}
+
+async function saveAssessment() {
+  if (!runtime.initiativeId) {
+    setAssessmentStatus("No linked initiative. Open assessment from the queue.", "status-warn");
+    return;
+  }
+  const report = lastComputedReport || runCalculation();
+  const assessmentPayload = {
+    savedAt: new Date().toISOString(),
+    stage0Choice: report.stage0Choice,
+    project: report.project,
+    scoreInput: report.scoreInput,
+    evidenceInput: report.evidenceInput,
+    weightsInput: report.weightsInput,
+    gate: report.gate,
+    score: report.score,
+    rawScore: report.rawScore,
+    confidenceIndex: report.confidenceIndex,
+    scores: report.scores,
+    classification: report.classification,
+    reportText: report.text,
+    configSnapshot: report.configSnapshot,
+  };
+  let updated = null;
+  try {
+    updated = await saveInitiativeAssessment(runtime.initiativeId, assessmentPayload, "reviewer");
+  } catch (error) {
+    setAssessmentStatus(error?.message || "Failed to save assessment.", "status-warn");
+    return;
+  }
+  if (!updated) {
+    setAssessmentStatus("Failed to save assessment. Initiative not found.", "status-warn");
+    return;
+  }
+  runtime.initiative = updated;
+  renderInitiativeContext();
+  setAssessmentStatus(
+    `Assessment saved to ${updated.id}. Status moved to ${updated.status}. Open Decision Review for the next step.`,
+    "status-ok"
+  );
+}
+
 renderCriteria();
 bindCriteriaListeners();
 resetForm();
+void loadInitiativeContext();
 el.runButton.addEventListener("click", runCalculation);
 el.copyButton.addEventListener("click", copyReport);
 el.resetButton.addEventListener("click", resetForm);
+if (el.saveAssessmentButton) {
+  el.saveAssessmentButton.addEventListener("click", async () => {
+    await saveAssessment();
+  });
+}
 if (el.normalizeWeightsButton) {
   el.normalizeWeightsButton.addEventListener("click", normalizeWeightsInUI);
 }

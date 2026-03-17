@@ -1,5 +1,6 @@
 import {
   CRITERIA,
+  GATES,
   applyWeightOverrides,
   mergeWithDefaultConfig,
   normalizeCriteriaWeights,
@@ -7,8 +8,24 @@ import {
 } from "./decision-engine.js";
 import { getDefaultConfig, loadConfig, resetConfig, saveConfig } from "./settings.js";
 
+const STAGE0_POLICY_LABELS = {
+  genai_rag: "GenAI / RAG",
+  agentic: "Agentic",
+  classical_ml: "Classical ML",
+  deterministic: "Deterministic automation",
+};
+
+const REGION_POLICY_LABELS = {
+  "eu-us": "EU + US",
+  eu: "EU",
+  us: "US",
+  global: "Global",
+};
+
 const el = {
   criteriaContainer: document.getElementById("configCriteriaContainer"),
+  stage0PolicyContainer: document.getElementById("stage0PolicyContainer"),
+  regionPolicyContainer: document.getElementById("regionPolicyContainer"),
   configWeightTotal: document.getElementById("configWeightTotal"),
   thresholdTierA: document.getElementById("thresholdTierA"),
   thresholdTierB: document.getElementById("thresholdTierB"),
@@ -25,6 +42,18 @@ const el = {
 
 function weightInputId(key) {
   return `cfgWeight_${key}`;
+}
+
+function policyDeltaId(scope, key) {
+  return `cfg_${scope}_${key}_delta`;
+}
+
+function policyMaxTierId(scope, key) {
+  return `cfg_${scope}_${key}_maxTier`;
+}
+
+function policyGateId(scope, policyKey, gateKey) {
+  return `cfg_${scope}_${policyKey}_gate_${gateKey}`;
 }
 
 function renderCriteria(config) {
@@ -45,6 +74,75 @@ function renderCriteria(config) {
     fragment.appendChild(row);
   });
   el.criteriaContainer.appendChild(fragment);
+}
+
+function renderPolicyCards(container, scope, labels, configPolicies) {
+  const fragment = document.createDocumentFragment();
+  Object.entries(labels).forEach(([key, label]) => {
+    const policy = configPolicies[key];
+    const card = document.createElement("section");
+    card.className = "policy-card";
+    const gateControls = GATES.map(
+      (gate) => `
+        <label>
+          ${gate.label}
+          <select id="${policyGateId(scope, key, gate.key)}">
+            <option value="fail"${!policy.minGateStates[gate.key] ? " selected" : ""}>No minimum</option>
+            <option value="conditional"${policy.minGateStates[gate.key] === "conditional" ? " selected" : ""}>Conditional</option>
+            <option value="pass"${policy.minGateStates[gate.key] === "pass" ? " selected" : ""}>Pass</option>
+          </select>
+        </label>
+      `
+    ).join("");
+
+    card.innerHTML = `
+      <div class="policy-card-head">
+        <h3>${label}</h3>
+        <span class="tag">Policy</span>
+      </div>
+      <div class="grid two">
+        <label>
+          Threshold delta
+          <input id="${policyDeltaId(scope, key)}" type="number" min="-30" max="30" step="1" value="${policy.thresholdDelta}" />
+        </label>
+        <label>
+          Max tier
+          <select id="${policyMaxTierId(scope, key)}">
+            <option value="A"${policy.maxTier === "A" ? " selected" : ""}>A</option>
+            <option value="B"${policy.maxTier === "B" ? " selected" : ""}>B</option>
+            <option value="C"${policy.maxTier === "C" ? " selected" : ""}>C</option>
+          </select>
+        </label>
+      </div>
+      <div class="policy-gates">
+        ${gateControls}
+      </div>
+    `;
+    fragment.appendChild(card);
+  });
+  container.appendChild(fragment);
+}
+
+function readPolicyMapFromUI(scope, labels) {
+  return Object.fromEntries(
+    Object.keys(labels).map((key) => {
+      const minGateStates = Object.fromEntries(
+        GATES.map((gate) => [
+          gate.key,
+          document.getElementById(policyGateId(scope, key, gate.key)).value,
+        ]).filter(([, value]) => value !== "fail")
+      );
+
+      return [
+        key,
+        {
+          thresholdDelta: Number(document.getElementById(policyDeltaId(scope, key)).value),
+          maxTier: document.getElementById(policyMaxTierId(scope, key)).value,
+          minGateStates,
+        },
+      ];
+    })
+  );
 }
 
 function getCriteriaFromUI() {
@@ -89,6 +187,8 @@ function collectConfigFromUI() {
       partial: Number(el.evidencePartial.value),
       validated: Number(el.evidenceValidated.value),
     },
+    stage0Policies: readPolicyMapFromUI("stage0", STAGE0_POLICY_LABELS),
+    regionPolicies: readPolicyMapFromUI("region", REGION_POLICY_LABELS),
   });
 }
 
@@ -114,6 +214,26 @@ function populateFromConfig(config) {
   el.evidenceAssumed.value = String(config.evidenceMultipliers.assumed);
   el.evidencePartial.value = String(config.evidenceMultipliers.partial);
   el.evidenceValidated.value = String(config.evidenceMultipliers.validated);
+
+  Object.keys(STAGE0_POLICY_LABELS).forEach((key) => {
+    const policy = config.stage0Policies[key];
+    document.getElementById(policyDeltaId("stage0", key)).value = String(policy.thresholdDelta);
+    document.getElementById(policyMaxTierId("stage0", key)).value = policy.maxTier;
+    GATES.forEach((gate) => {
+      document.getElementById(policyGateId("stage0", key, gate.key)).value =
+        policy.minGateStates[gate.key] || "fail";
+    });
+  });
+
+  Object.keys(REGION_POLICY_LABELS).forEach((key) => {
+    const policy = config.regionPolicies[key];
+    document.getElementById(policyDeltaId("region", key)).value = String(policy.thresholdDelta);
+    document.getElementById(policyMaxTierId("region", key)).value = policy.maxTier;
+    GATES.forEach((gate) => {
+      document.getElementById(policyGateId("region", key, gate.key)).value =
+        policy.minGateStates[gate.key] || "fail";
+    });
+  });
 }
 
 function bindListeners() {
@@ -141,6 +261,26 @@ function bindListeners() {
     });
   });
 
+  [
+    ...Object.keys(STAGE0_POLICY_LABELS).flatMap((key) => [
+      document.getElementById(policyDeltaId("stage0", key)),
+      document.getElementById(policyMaxTierId("stage0", key)),
+      ...GATES.map((gate) => document.getElementById(policyGateId("stage0", key, gate.key))),
+    ]),
+    ...Object.keys(REGION_POLICY_LABELS).flatMap((key) => [
+      document.getElementById(policyDeltaId("region", key)),
+      document.getElementById(policyMaxTierId("region", key)),
+      ...GATES.map((gate) => document.getElementById(policyGateId("region", key, gate.key))),
+    ]),
+  ].forEach((input) => {
+    input.addEventListener("input", () => {
+      updatePreview(collectConfigFromUI());
+    });
+    input.addEventListener("change", () => {
+      updatePreview(collectConfigFromUI());
+    });
+  });
+
   el.saveConfigButton.addEventListener("click", () => {
     const saved = saveConfig(collectConfigFromUI());
     updatePreview(saved);
@@ -158,6 +298,8 @@ function bindListeners() {
 
 const initialConfig = mergeWithDefaultConfig(loadConfig() || getDefaultConfig());
 renderCriteria(initialConfig);
+renderPolicyCards(el.stage0PolicyContainer, "stage0", STAGE0_POLICY_LABELS, initialConfig.stage0Policies);
+renderPolicyCards(el.regionPolicyContainer, "region", REGION_POLICY_LABELS, initialConfig.regionPolicies);
 populateFromConfig(initialConfig);
 refreshWeightSummary();
 updatePreview(initialConfig);
