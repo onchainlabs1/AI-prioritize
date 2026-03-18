@@ -15,6 +15,9 @@ That module now presents the solution as a lighter decision workbench:
 3. register decisions with rationale
 4. keep an audit trail in SQLite
 
+## Product overview
+![Workbench overview](./enterprise-ai-prioritizer/docs/screenshots/workbench-overview.png)
+
 ## Current UI snapshots
 ### Decision dashboard
 ![Decision dashboard](./enterprise-ai-prioritizer/docs/screenshots/decision-dashboard.png)

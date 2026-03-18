@@ -36,6 +36,9 @@ Backend and supporting logic:
 3. `initiative-store.js`: frontend API client and payload normalization helpers.
 4. `dashboard.js`, `triage.js`, `app.js`, `board.js`, `config.js`: page controllers.
 
+## Overview
+![Workbench overview](./docs/screenshots/workbench-overview.png)
+
 ## Screenshots
 
 ### Decision dashboard
