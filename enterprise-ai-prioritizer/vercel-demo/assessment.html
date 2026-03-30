@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Initiative Assessment</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="hero-shell">
+      <div class="hero-glow one"></div>
+      <div class="hero-glow two"></div>
+      <div class="hero">
+        <p class="eyebrow">Enterprise AI Portfolio Intelligence</p>
+        <h1>Quick Prioritization Assessment</h1>
+        <p>
+          A fast working view to compare value, effort, readiness, and the best next step.
+        </p>
+        <nav class="top-nav">
+          <a href="./index.html">Home</a>
+          <a href="./submit.html">Submit</a>
+          <a href="./triage.html">Queue</a>
+          <a href="./board.html">Decisions</a>
+          <a href="./assessment.html" class="active">Assessment</a>
+          <a href="./config.html">Settings</a>
+          <a href="./how-it-works.html">Approach</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="workspace compact-workspace">
+      <section class="main-column">
+        <article class="panel compact-note" style="--delay: 0ms">
+          <div class="panel-head">
+            <h2>Fast Pass</h2>
+            <span class="tag">Focus</span>
+          </div>
+          <ul class="clean-list">
+            <li>Use defaults to get to a recommendation quickly.</li>
+            <li>Adjust checks and scoring only when the initiative needs a closer look.</li>
+            <li>Save the outcome when you are ready to move the item forward.</li>
+          </ul>
+        </article>
+
+        <article class="panel" style="--delay: 0ms">
+          <div class="panel-head">
+            <h2>Initiative Context</h2>
+            <span class="tag">Record</span>
+          </div>
+          <p id="initiativeContext" class="hint">
+            Open this page with `?id=<initiative-id>` from the queue to save this assessment.
+          </p>
+        </article>
+
+        <article class="panel" style="--delay: 0ms">
+          <div class="panel-head">
+            <h2>01. Quick Pass</h2>
+            <span class="tag">Input</span>
+          </div>
+          <p class="hint">
+            Start with the business context and best-fit approach. If the item looks promising, you can refine it below.
+          </p>
+          <div class="grid two">
+            <label>
+              Project name
+              <input id="projectName" type="text" placeholder="e.g. Internal IT Assistant" />
+            </label>
+            <label>
+              Business unit
+              <input id="businessUnit" type="text" placeholder="e.g. Operations" />
+            </label>
+            <label>
+              Use-case type
+              <select id="useCaseType">
+                <option value="assistant">Internal assistant</option>
+                <option value="customer_support">Customer support</option>
+                <option value="automation">Process automation</option>
+                <option value="analytics">Analytics and forecasting</option>
+                <option value="risk">Risk/compliance</option>
+              </select>
+            </label>
+            <label>
+              Best-fit approach
+              <select id="stage0Fit">
+                <option value="genai_rag">GenAI / RAG candidate</option>
+                <option value="agentic">Agentic candidate</option>
+                <option value="classical_ml">Classical ML candidate</option>
+                <option value="deterministic">Deterministic automation candidate</option>
+                <option value="not_suitable">Not suitable yet (requires process redesign)</option>
+              </select>
+            </label>
+          </div>
+          <details class="compact-advanced">
+            <summary>Additional context</summary>
+            <div class="grid two">
+              <label>
+                Regulatory region
+                <select id="region">
+                  <option value="eu-us">EU + US</option>
+                  <option value="eu">EU</option>
+                  <option value="us">US</option>
+                  <option value="global">Global</option>
+                </select>
+              </label>
+            </div>
+          </details>
+        </article>
+
+        <article class="panel" style="--delay: 80ms">
+          <div class="panel-head">
+            <h2>02. Delivery Checks</h2>
+            <span class="tag critical">Quick checks</span>
+          </div>
+          <p class="hint">
+            Keep these simple. They are here to catch obvious blockers before you invest more time.
+          </p>
+          <div class="gates-grid">
+            <label class="gate-row">
+              <span>Regulatory risk classification</span>
+              <select id="gateRegulatory">
+                <option value="pass">Pass</option>
+                <option value="conditional">Conditional</option>
+                <option value="fail">Fail</option>
+              </select>
+            </label>
+            <label class="gate-row">
+              <span>Security threat model</span>
+              <select id="gateSecurity">
+                <option value="pass">Pass</option>
+                <option value="conditional">Conditional</option>
+                <option value="fail">Fail</option>
+              </select>
+            </label>
+            <label class="gate-row">
+              <span>Data governance readiness</span>
+              <select id="gateData">
+                <option value="pass">Pass</option>
+                <option value="conditional">Conditional</option>
+                <option value="fail">Fail</option>
+              </select>
+            </label>
+            <label class="gate-row">
+              <span>KPI baseline + unit economics</span>
+              <select id="gateEconomics">
+                <option value="pass">Pass</option>
+                <option value="conditional">Conditional</option>
+                <option value="fail">Fail</option>
+              </select>
+            </label>
+          </div>
+        </article>
+
+        <article class="panel" style="--delay: 140ms">
+          <div class="panel-head">
+            <h2>03. Score Drivers</h2>
+            <span class="tag">Advanced</span>
+          </div>
+          <p class="hint">
+            Defaults are enough for a quick pass. Open this section only if you want to tune the recommendation.
+          </p>
+          <details id="scoringDetails" class="compact-advanced scoring-advanced">
+            <summary>Refine score drivers and confidence</summary>
+            <div class="weight-toolbar">
+              <div id="weightsTotal" class="weight-total">Weight total entered: 100%</div>
+              <button id="normalizeWeightsButton" class="tertiary" type="button">
+                Normalize Weights to 100%
+              </button>
+            </div>
+            <div id="criteriaContainer" class="criteria"></div>
+          </details>
+        </article>
+
+        <article class="panel" style="--delay: 200ms">
+          <div class="panel-head">
+            <h2>04. Recommendation</h2>
+            <span class="tag">Output</span>
+          </div>
+          <p id="modelSummary" class="hint"></p>
+          <div class="decision-summary">
+            <div class="decision-summary-head">
+              <span id="decisionPill" class="pill neutral">Awaiting assessment</span>
+              <h3 id="decisionHeadline">Run the quick pass to see a recommendation.</h3>
+              <p id="decisionNarrative" class="hint">
+                Start with the defaults, then refine only if the initiative needs more scrutiny.
+              </p>
+            </div>
+            <div class="decision-strip">
+              <div class="metric">
+                <span>Score</span>
+                <strong id="scoreValue">--</strong>
+              </div>
+              <div class="metric">
+                <span>Lane</span>
+                <strong id="laneValue">--</strong>
+              </div>
+              <div class="metric">
+                <span>Checks</span>
+                <strong id="gateValue">--</strong>
+              </div>
+              <div class="metric">
+                <span>Confidence</span>
+                <strong id="confidenceValue">--</strong>
+              </div>
+            </div>
+            <div class="progress-track" aria-hidden="true">
+              <div id="scoreBar" class="progress-bar"></div>
+            </div>
+            <div class="decision-next-step">
+              <strong>Suggested next step</strong>
+              <p id="nextStepText" class="hint">No recommendation yet.</p>
+            </div>
+          </div>
+          <div class="actions">
+            <button id="runButton">Calculate Priority</button>
+            <button id="saveAssessmentButton" class="secondary">Save Assessment</button>
+            <button id="copyButton" class="secondary">Copy Report</button>
+            <button id="resetButton" class="secondary">Reset</button>
+          </div>
+          <p id="assessmentStatus" class="hint"></p>
+          <details class="compact-advanced report-details">
+            <summary>View full rationale and score breakdown</summary>
+            <div id="result" class="result empty">Fill the fields and click "Calculate Priority".</div>
+          </details>
+        </article>
+      </section>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

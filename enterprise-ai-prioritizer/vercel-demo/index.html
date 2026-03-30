@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Prioritization Workbench</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="hero-shell">
+      <div class="hero-glow one"></div>
+      <div class="hero-glow two"></div>
+      <div class="hero">
+        <p class="eyebrow">AI Initiative Prioritization Workbench</p>
+        <h1>Portfolio Priorities At A Glance</h1>
+        <p>
+          Compare ideas, focus on the best next moves, and keep decisions visible across the
+          portfolio. This demo runs entirely in the browser and keeps sample data locally on each
+          device.
+        </p>
+        <nav class="top-nav">
+          <a href="./index.html" class="active">Home</a>
+          <a href="./submit.html">Submit</a>
+          <a href="./triage.html">Queue</a>
+          <a href="./assessment.html">Assessment</a>
+          <a href="./board.html">Decisions</a>
+          <a href="./config.html">Settings</a>
+          <a href="./how-it-works.html">Approach</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="main-column">
+        <article class="panel" style="--delay: 0ms">
+          <div class="panel-head">
+            <h2>Decision Snapshot</h2>
+            <span class="tag">Live</span>
+          </div>
+          <div class="dashboard-kpis">
+            <div class="kpi-card">
+              <span>Move now</span>
+              <strong id="kpiNow">0</strong>
+            </div>
+            <div class="kpi-card">
+              <span>Need decision</span>
+              <strong id="kpiDecision">0</strong>
+            </div>
+            <div class="kpi-card">
+              <span>Need clarity</span>
+              <strong id="kpiClarity">0</strong>
+            </div>
+            <div class="kpi-card">
+              <span>Approved momentum</span>
+              <strong id="kpiApproved">0</strong>
+            </div>
+          </div>
+          <p id="executiveSummary" class="hint">
+            Loading the current portfolio picture.
+          </p>
+        </article>
+
+        <article class="panel" style="--delay: 60ms">
+          <div class="panel-head">
+            <h2>Recommended Now</h2>
+            <span id="priorityCount" class="tag">0</span>
+          </div>
+          <p class="hint">The strongest near-term opportunities based on current lane, score, and readiness.</p>
+          <div id="priorityList" class="queue-list"></div>
+        </article>
+
+        <article class="panel" style="--delay: 100ms">
+          <div class="panel-head">
+            <h2>Needs A Call</h2>
+            <span id="decisionCount" class="tag">0</span>
+          </div>
+          <p class="hint">Items that are ready for a decision or should be pulled back into focus.</p>
+          <div id="decisionQueueList" class="queue-list"></div>
+        </article>
+      </section>
+
+      <aside class="side-column">
+        <article class="panel side" style="--delay: 120ms">
+          <div class="panel-head">
+            <h2>Needs Clarity</h2>
+            <span class="tag critical">Focus</span>
+          </div>
+          <p class="hint">These items are worth attention before they become real portfolio decisions.</p>
+          <ul id="alertList" class="clean-list"></ul>
+        </article>
+
+        <article class="panel side" style="--delay: 160ms">
+          <div class="panel-head">
+            <h2>Recent Decisions</h2>
+            <span class="tag">Latest</span>
+          </div>
+          <ul id="decisionList" class="clean-list"></ul>
+        </article>
+
+        <article class="panel side" style="--delay: 200ms">
+          <div class="panel-head">
+            <h2>Jump Back In</h2>
+            <span class="tag">Actions</span>
+          </div>
+          <div class="actions">
+            <a class="btn-link" href="./triage.html">Open Queue</a>
+            <a class="btn-link" href="./board.html">Open Decisions</a>
+            <a class="btn-link" href="./submit.html">Submit New Idea</a>
+          </div>
+        </article>
+      </aside>
+    </main>
+
+    <script type="module" src="./dashboard.js"></script>
+  </body>
+</html>

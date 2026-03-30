@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Submit AI Initiative</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="hero-shell">
+      <div class="hero">
+        <p class="eyebrow">AI Initiative Prioritization Workbench</p>
+        <h1>Submit Idea</h1>
+        <p>
+          Capture AI opportunities with enough context to compare value, effort, and next steps.
+        </p>
+        <nav class="top-nav">
+          <a href="./index.html">Home</a>
+          <a href="./submit.html" class="active">Submit</a>
+          <a href="./triage.html">Queue</a>
+          <a href="./board.html">Decisions</a>
+          <a href="./assessment.html">Assessment</a>
+          <a href="./config.html">Settings</a>
+          <a href="./how-it-works.html">Approach</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="workspace config-workspace">
+      <section class="main-column">
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Opportunity Intake</h2>
+            <span class="tag">MVP</span>
+          </div>
+          <form id="submitForm" class="grid two">
+            <label>
+              Initiative title
+              <input id="title" required type="text" />
+            </label>
+            <label>
+              Business unit / area
+              <input id="businessUnit" required type="text" />
+            </label>
+            <label>
+              Requester name
+              <input id="requesterName" required type="text" />
+            </label>
+            <label>
+              Requester email
+              <input id="requesterEmail" required type="email" />
+            </label>
+            <label>
+              Business owner
+              <input id="businessOwner" required type="text" />
+            </label>
+            <label>
+              Desired timeline
+              <input id="desiredTimeline" type="text" placeholder="e.g. Q3 2026" />
+            </label>
+            <label>
+              KPI to impact
+              <input id="kpiTarget" type="text" />
+            </label>
+            <label>
+              Process frequency / volume
+              <input id="processFrequency" type="text" />
+            </label>
+            <label class="full">
+              Current problem description
+              <textarea id="problemDescription" rows="4" required></textarea>
+            </label>
+            <label class="full">
+              Expected outcome
+              <textarea id="expectedOutcome" rows="3" required></textarea>
+            </label>
+            <label class="full">
+              Systems involved
+              <input id="systemsInvolved" type="text" placeholder="e.g. SAP, ServiceNow, Salesforce" />
+            </label>
+            <label class="full">
+              Data type / sensitivity
+              <input id="dataSensitivity" type="text" placeholder="e.g. internal, confidential, personal data" />
+            </label>
+            <label class="full">
+              Optional attachments / references (URLs or notes)
+              <textarea id="attachments" rows="2"></textarea>
+            </label>
+            <label>
+              Suggested owner
+              <input id="owner" type="text" placeholder="e.g. architecture.board" />
+            </label>
+            <div class="actions full">
+              <button type="submit">Submit Initiative</button>
+              <a class="btn-link" href="./triage.html">Open Queue</a>
+            </div>
+            <p id="submitStatus" class="hint full"></p>
+          </form>
+        </article>
+      </section>
+    </main>
+
+    <script type="module" src="./submit.js"></script>
+  </body>
+</html>

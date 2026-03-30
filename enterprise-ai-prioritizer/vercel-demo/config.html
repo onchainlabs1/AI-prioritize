@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Prioritizer Configuration</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="hero-shell config-hero">
+      <div class="hero">
+        <p class="eyebrow">Model Settings</p>
+        <h1>Prioritization model settings</h1>
+        <p>
+          Tune scoring defaults, readiness behavior, and route guidance. In this demo build, settings and initiative data stay in this browser only.
+        </p>
+        <nav class="top-nav">
+          <a href="./index.html">Home</a>
+          <a href="./submit.html">Submit</a>
+          <a href="./triage.html">Queue</a>
+          <a href="./board.html">Decisions</a>
+          <a href="./assessment.html">Assessment</a>
+          <a href="./config.html" class="active">Settings</a>
+          <a href="./how-it-works.html">Approach</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="workspace config-workspace">
+      <section class="main-column">
+        <article class="panel">
+          <div class="panel-head">
+            <h2>01. Default Criterion Weights</h2>
+            <span class="tag">Config</span>
+          </div>
+          <p class="hint">These are baseline defaults; project-level overrides can still be done on the main page.</p>
+          <div id="configCriteriaContainer" class="criteria"></div>
+          <div id="configWeightTotal" class="weight-total">Weight total entered: 100%</div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>02. Lane Thresholds</h2>
+            <span class="tag">Config</span>
+          </div>
+          <div class="grid two">
+            <label>
+              Tier A threshold
+              <input id="thresholdTierA" type="number" min="0" max="100" step="0.1" />
+            </label>
+            <label>
+              Tier B threshold
+              <input id="thresholdTierB" type="number" min="0" max="100" step="0.1" />
+            </label>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>03. Readiness Check Behavior</h2>
+            <span class="tag critical">Config</span>
+          </div>
+          <div class="grid two">
+            <label>
+              Conditional gate penalty
+              <input id="conditionalPenalty" type="number" min="0" max="50" step="0.1" />
+            </label>
+            <label>
+              Max tier if any conditional gate exists
+              <select id="maxTierIfConditional">
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+              </select>
+            </label>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>04. Evidence Multipliers</h2>
+            <span class="tag">Config</span>
+          </div>
+          <p class="hint">Lower multipliers reduce score contribution when evidence quality is weak and also reduce the confidence index.</p>
+          <div class="grid three">
+            <label>
+              Assumed (low confidence)
+              <input id="evidenceAssumed" type="number" min="0.1" max="2" step="0.01" />
+            </label>
+            <label>
+              Partial (medium confidence)
+              <input id="evidencePartial" type="number" min="0.1" max="2" step="0.01" />
+            </label>
+            <label>
+              Validated (high confidence)
+              <input id="evidenceValidated" type="number" min="0.1" max="2" step="0.01" />
+            </label>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>05. Approach Defaults</h2>
+            <span class="tag">Config</span>
+          </div>
+          <p class="hint">Adjust threshold deltas, tier caps, and baseline checks for each approach.</p>
+          <div id="stage0PolicyContainer" class="policy-grid"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>06. Region Defaults</h2>
+            <span class="tag">Config</span>
+          </div>
+          <p class="hint">Apply region-specific defaults before final prioritization when needed.</p>
+          <div id="regionPolicyContainer" class="policy-grid"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>07. Actions</h2>
+          </div>
+          <div class="actions">
+            <button id="saveConfigButton">Save Configuration</button>
+            <button id="resetConfigButton" class="secondary">Reset to Defaults</button>
+            <button id="resetDemoButton" class="secondary">Reset Demo Scenario</button>
+          </div>
+          <div id="configStatus" class="hint status-msg"></div>
+        </article>
+      </section>
+
+      <aside class="side-column">
+        <article class="panel side">
+          <div class="panel-head">
+            <h2>Current Model Snapshot</h2>
+          </div>
+          <pre id="configPreview" class="json-preview"></pre>
+        </article>
+      </aside>
+    </main>
+
+    <script type="module" src="./config.js"></script>
+  </body>
+</html>
